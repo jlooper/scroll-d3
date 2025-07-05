@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dark space theme background with custom colors */
+body {
+  background: linear-gradient(135deg, #3a015c 0%, #4f0147 20%, #35012c 40%, #290025 60%, #11001c 80%, #000000 100%);
+  color: white;
+}
+
+/* Custom styles for scrollytelling functionality */
+.step.active {
+  @apply scale-110;
+  transform: scale(1.1) translateY(-10px);
+  background: transparent;
+}
+
+/* Active panels - transparent with white text */
+.step[data-index="0"].active,
+.step[data-index="1"].active,
+.step[data-index="2"].active {
+  background: transparent;
+  color: white;
+}
+
+/* Full row background colors when active - full width */
+#scrolly-columns:has(.step[data-index="0"].active) {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+  min-height: 100vh;
+  padding: 2rem 0;
+  margin: -2rem 0;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  position: relative;
+}
+
+#scrolly-columns:has(.step[data-index="1"].active) {
+  background: linear-gradient(135deg, rgba(240, 147, 251, 0.2) 0%, rgba(245, 87, 108, 0.2) 100%);
+  min-height: 100vh;
+  padding: 2rem 0;
+  margin: -2rem 0;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  position: relative;
+}
+
+#scrolly-columns:has(.step[data-index="2"].active) {
+  background: linear-gradient(135deg, rgba(79, 172, 254, 0.2) 0%, rgba(0, 242, 254, 0.2) 100%);
+  min-height: 100vh;
+  padding: 2rem 0;
+  margin: -2rem 0;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  position: relative;
+}
+
+.step.active .text h2 {
+  color: white;
+}
+
+.step.active .text p {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* D3 transition styles */
+#main-image {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Mobile adjustments */
+@media (max-width: 1024px) {
+  #scrolly-container {
+    @apply space-y-[40vh] py-[40vh];
+  }
+  
+  #image-col {
+    height: 50vh;
+    position: relative;
+  }
+} 

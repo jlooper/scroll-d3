@@ -1,0 +1,28 @@
+{
+  "name": "scroll-d3",
+  "version": "1.0.0",
+  "description": "Scrollytelling template with D3.js, images, and text.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "concurrently \"npm run watch:css\" \"npm run serve\"",
+    "serve": "serve . -l 3000",
+    "watch:css": "tailwindcss -i ./style.css -o ./dist/output.css --watch",
+    "build:css": "tailwindcss -i ./style.css -o ./dist/output.css --watch",
+    "build": "tailwindcss -i ./style.css -o ./dist/output.css --minify"
+  },
+  "keywords": [
+    "d3",
+    "scrollytelling",
+    "static",
+    "template"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.0",
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0",
+    "concurrently": "^8.2.2"
+  }
+}
