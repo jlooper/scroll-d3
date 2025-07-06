@@ -86,20 +86,53 @@ document.addEventListener('DOMContentLoaded', function() {
   
   animateStars();
 
-  // Function to handle image transitions
+  // Function to generate responsive URLs for scrollytelling images
+  function generateScrollyResponsiveUrls(baseUrl) {
+    // Extract the base URL without the image ID
+    const urlParts = baseUrl.split('/');
+    const imageIdIndex = urlParts.findIndex(part => part.startsWith('v'));
+    
+    if (imageIdIndex === -1) {
+      // Fallback if we can't find the image ID
+      return {
+        small: `${baseUrl}`,
+        medium: `${baseUrl}`,
+        large: `${baseUrl}`,
+        xlarge: `${baseUrl}`
+      };
+    }
+    
+    // Get the base URL up to the transformations
+    const baseUrlWithoutImage = urlParts.slice(0, imageIdIndex).join('/');
+    const imageId = urlParts.slice(imageIdIndex).join('/');
+    
+    return {
+      small: `${baseUrlWithoutImage}/w_300,dpr_auto/f_auto/q_auto/${imageId}`,
+      medium: `${baseUrlWithoutImage}/w_600,dpr_auto/f_auto/q_auto/${imageId}`,
+      large: `${baseUrlWithoutImage}/w_900,dpr_auto/f_auto/q_auto/${imageId}`,
+      xlarge: `${baseUrlWithoutImage}/w_1200,dpr_auto/f_auto/q_auto/${imageId}`
+    };
+  }
+
+  // Function to handle image transitions with responsive support
   function handleImageTransition(imgElement, imgUrl, isFirstImage = false) {
     console.log('Handling image transition:', imgUrl, 'isFirstImage:', isFirstImage);
     
     if (isFirstImage) {
-      // First image - fade in
+      // First image - fade in with responsive srcset
+      const urls = generateScrollyResponsiveUrls(imgUrl);
+      const srcset = `${urls.small} 300w, ${urls.medium} 600w, ${urls.large} 900w, ${urls.xlarge} 1200w`;
+      
       d3.select(imgElement)
+        .attr('srcset', srcset)
+        .attr('sizes', '(max-width: 600px) 300px, (max-width: 900px) 600px, (max-width: 1200px) 900px, 1200px')
         .transition()
         .duration(800)
         .style('opacity', 1)
         .style('transform', 'scale(1) rotate(0deg)')
         .style('filter', 'blur(0px) brightness(1)');
     } else {
-      // Subsequent images - dramatic transition
+      // Subsequent images - dramatic transition with responsive srcset
       d3.select(imgElement)
         .transition()
         .duration(400)
@@ -107,8 +140,14 @@ document.addEventListener('DOMContentLoaded', function() {
         .style('transform', 'scale(0.8) rotate(-5deg)')
         .style('filter', 'blur(8px) brightness(0.5)')
         .on('end', function() {
-          // Change image source
-          d3.select(imgElement).attr('src', imgUrl);
+          // Update image with responsive srcset
+          const urls = generateScrollyResponsiveUrls(imgUrl);
+          const srcset = `${urls.small} 300w, ${urls.medium} 600w, ${urls.large} 900w, ${urls.xlarge} 1200w`;
+          
+          d3.select(imgElement)
+            .attr('srcset', srcset)
+            .attr('sizes', '(max-width: 600px) 300px, (max-width: 900px) 600px, (max-width: 1200px) 900px, 1200px')
+            .attr('src', urls.medium);
           
           // Reset styles for entrance
           d3.select(imgElement)
@@ -200,45 +239,86 @@ document.addEventListener('DOMContentLoaded', function() {
   const baseUrl = 'https://res.cloudinary.com/dr60nybtj/image/upload';
   const imageId = 'v1751747260/float3_kamv1f.png';
 
-  // Function to generate Cloudinary URL
+  // Function to generate Cloudinary URL with automatic optimization
   function generateCloudinaryUrl(transformations) {
     if (!transformations || transformations.trim() === '') {
-      return `${baseUrl}/${imageId}`;
+      return `${baseUrl}/f_auto/q_auto/${imageId}`;
     }
-    return `${baseUrl}/${transformations}/${imageId}`;
+    return `${baseUrl}/${transformations}/f_auto/q_auto/${imageId}`;
   }
 
-  // Function to update the custom image
+  // Function to update the custom image with responsive handling
   function updateCustomImage(transformations) {
     const url = generateCloudinaryUrl(transformations);
     
     // Update the URL display
     generatedUrl.text(url);
     
-    // Update the image with a smooth transition
+    // Update the image with responsive srcset and smooth transition
     customImage
       .transition()
       .duration(300)
       .style('opacity', 0)
       .on('end', function() {
+        updateImageWithSrcset(this, transformations);
         d3.select(this)
-          .attr('src', url)
           .transition()
           .duration(300)
           .style('opacity', 1);
       });
   }
 
-  // Handle Apply button click
+  // Function to validate transformation parameters
+  function validateTransformations(transformations) {
+    if (!transformations || transformations.trim() === '') {
+      return { isValid: true, message: '' };
+    }
+    
+    // Basic validation for common transformation parameters
+    const validParams = [
+      'e_', 'c_', 'w_', 'h_', 'g_', 'f_', 'q_', 'dpr_', 'o_', 'r_', 'b_', 'bo_', 'co_', 'a_', 'fl_'
+    ];
+    
+    const params = transformations.split('/').flatMap(t => t.split(','));
+    const invalidParams = params.filter(param => {
+      const trimmed = param.trim();
+      return trimmed && !validParams.some(valid => trimmed.startsWith(valid));
+    });
+    
+    if (invalidParams.length > 0) {
+      return { 
+        isValid: false, 
+        message: `Invalid parameters: ${invalidParams.join(', ')}. Please check Cloudinary documentation.` 
+      };
+    }
+    
+    return { isValid: true, message: '' };
+  }
+
+  // Handle Apply button click with validation
   applyButton.on('click', function() {
     const transformations = transformationInput.property('value');
+    const validation = validateTransformations(transformations);
+    
+    if (!validation.isValid) {
+      alert(validation.message);
+      return;
+    }
+    
     updateCustomImage(transformations);
   });
 
-  // Handle Enter key in textarea
+  // Handle Enter key in textarea with validation
   transformationInput.on('keydown', function(event) {
     if (event.key === 'Enter' && event.ctrlKey) {
       const transformations = transformationInput.property('value');
+      const validation = validateTransformations(transformations);
+      
+      if (!validation.isValid) {
+        alert(validation.message);
+        return;
+      }
+      
       updateCustomImage(transformations);
     }
   });
@@ -249,6 +329,28 @@ document.addEventListener('DOMContentLoaded', function() {
     transformationInput.property('value', transform);
     updateCustomImage(transform);
   });
+
+  // Function to generate responsive image URLs with DPR awareness
+  function generateResponsiveUrls(transformations) {
+    const baseTransform = transformations ? `${transformations}/` : '';
+    return {
+      small: `${baseUrl}/${baseTransform}w_300,dpr_auto/f_auto/q_auto/${imageId}`,
+      medium: `${baseUrl}/${baseTransform}w_600,dpr_auto/f_auto/q_auto/${imageId}`,
+      large: `${baseUrl}/${baseTransform}w_900,dpr_auto/f_auto/q_auto/${imageId}`,
+      xlarge: `${baseUrl}/${baseTransform}w_1200,dpr_auto/f_auto/q_auto/${imageId}`
+    };
+  }
+
+  // Function to update image with responsive srcset
+  function updateImageWithSrcset(imgElement, transformations) {
+    const urls = generateResponsiveUrls(transformations);
+    const srcset = `${urls.small} 300w, ${urls.medium} 600w, ${urls.large} 900w, ${urls.xlarge} 1200w`;
+    
+    d3.select(imgElement)
+      .attr('srcset', srcset)
+      .attr('sizes', '(max-width: 600px) 300px, (max-width: 900px) 600px, (max-width: 1200px) 900px, 1200px')
+      .attr('src', urls.medium); // Fallback for older browsers
+  }
 
   // Initialize with a default transformation
   const defaultTransform = 'e_cartoonify:70:80';
