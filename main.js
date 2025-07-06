@@ -1,6 +1,17 @@
 document.addEventListener('DOMContentLoaded', function() {
   const steps = d3.selectAll('.step');
   const mainImage = d3.select('#main-image');
+  const sectionImages = d3.selectAll('.section-image');
+
+  // Check if we're on desktop (large screen)
+  const isDesktop = window.innerWidth >= 1024; // lg breakpoint
+  
+  // Debug logging
+  console.log('Screen width:', window.innerWidth);
+  console.log('Is desktop:', isDesktop);
+  console.log('Main image found:', mainImage.node());
+  console.log('Steps found:', steps.nodes().length);
+  console.log('Section images found:', sectionImages.nodes().length);
 
   // Starfield effect
   const canvas = d3.select('#starfield').node();
@@ -75,74 +86,173 @@ document.addEventListener('DOMContentLoaded', function() {
   
   animateStars();
 
-  // Use IntersectionObserver for scroll detection
+  // Function to handle image transitions
+  function handleImageTransition(imgElement, imgUrl, isFirstImage = false) {
+    console.log('Handling image transition:', imgUrl, 'isFirstImage:', isFirstImage);
+    
+    if (isFirstImage) {
+      // First image - fade in
+      d3.select(imgElement)
+        .transition()
+        .duration(800)
+        .style('opacity', 1)
+        .style('transform', 'scale(1) rotate(0deg)')
+        .style('filter', 'blur(0px) brightness(1)');
+    } else {
+      // Subsequent images - dramatic transition
+      d3.select(imgElement)
+        .transition()
+        .duration(400)
+        .style('opacity', 0)
+        .style('transform', 'scale(0.8) rotate(-5deg)')
+        .style('filter', 'blur(8px) brightness(0.5)')
+        .on('end', function() {
+          // Change image source
+          d3.select(imgElement).attr('src', imgUrl);
+          
+          // Reset styles for entrance
+          d3.select(imgElement)
+            .style('opacity', 0)
+            .style('transform', 'scale(1.2) rotate(5deg)')
+            .style('filter', 'blur(8px) brightness(1.5)');
+          
+          // Dramatic entrance transition
+          d3.select(imgElement)
+            .transition()
+            .duration(600)
+            .style('opacity', 1)
+            .style('transform', 'scale(1) rotate(0deg)')
+            .style('filter', 'blur(0px) brightness(1)')
+            .on('end', function() {
+              // Add a subtle bounce effect
+              d3.select(imgElement)
+                .transition()
+                .duration(200)
+                .style('transform', 'scale(1.05)')
+                .transition()
+                .duration(200)
+                .style('transform', 'scale(1)');
+            });
+        });
+    }
+  }
+
+  // Single observer for all screen sizes
   const observer = new window.IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
+        console.log('Step intersecting:', entry.target.dataset.index);
+        
         steps.classed('active', false);
         const step = d3.select(entry.target);
         step.classed('active', true);
         
-        // Update image with exciting D3 transitions
+        // Get the image URL from the step
         const imgUrl = step.attr('data-img');
         if (imgUrl) {
-          // Check if this is the first image (no current src)
-          const currentSrc = mainImage.attr('src');
-          const isFirstImage = !currentSrc;
+          console.log('Image URL:', imgUrl, 'Is desktop:', isDesktop);
           
-          if (isFirstImage) {
-            // First image - fade in
-            mainImage
-              .attr('src', imgUrl)
-              .transition()
-              .duration(800)
-              .style('opacity', 1)
-              .style('transform', 'scale(1) rotate(0deg)')
-              .style('filter', 'blur(0px) brightness(1)');
+          // Check if we're on desktop or mobile
+          if (isDesktop && mainImage.node()) {
+            // Desktop: update the sticky main image
+            console.log('Updating desktop main image');
+            const currentSrc = mainImage.attr('src');
+            const isFirstImage = !currentSrc || currentSrc === imgUrl;
+            handleImageTransition(mainImage.node(), imgUrl, isFirstImage);
           } else {
-            // Subsequent images - dramatic transition
-            mainImage
-              .transition()
-              .duration(400)
-              .style('opacity', 0)
-              .style('transform', 'scale(0.8) rotate(-5deg)')
-              .style('filter', 'blur(8px) brightness(0.5)')
-              .on('end', function() {
-                // Change image source
-                mainImage.attr('src', imgUrl);
-                
-                // Reset styles for entrance
-                mainImage
-                  .style('opacity', 0)
-                  .style('transform', 'scale(1.2) rotate(5deg)')
-                  .style('filter', 'blur(8px) brightness(1.5)');
-                
-                // Dramatic entrance transition
-                mainImage
-                  .transition()
-                  .duration(600)
-                  .style('opacity', 1)
-                  .style('transform', 'scale(1) rotate(0deg)')
-                  .style('filter', 'blur(0px) brightness(1)')
-                  .on('end', function() {
-                    // Add a subtle bounce effect
-                    mainImage
-                      .transition()
-                      .duration(200)
-                      .style('transform', 'scale(1.05)')
-                      .transition()
-                      .duration(200)
-                      .style('transform', 'scale(1)');
-                  });
-              });
+            // Mobile: update the section image within this step
+            const stepImage = step.select('.section-image');
+            if (stepImage.node()) {
+              console.log('Updating mobile section image');
+              const currentOpacity = d3.select(stepImage.node()).style('opacity');
+              const isFirstImage = currentOpacity === '0' || currentOpacity === '';
+              handleImageTransition(stepImage.node(), imgUrl, isFirstImage);
+            }
           }
         }
       }
     });
   }, {
-    threshold: 0.8,
-    rootMargin: '0px 0px -20% 0px'
+    threshold: 0.6,
+    rootMargin: '0px 0px -15% 0px'
   });
 
+  // Observe all steps
   steps.nodes().forEach(step => observer.observe(step));
+  
+  // Show the first image immediately on desktop
+  if (isDesktop && mainImage.node()) {
+    console.log('Showing first image on desktop');
+    mainImage
+      .transition()
+      .duration(1000)
+      .style('opacity', 1);
+  }
+
+  // Interactive Transformation Section
+  const transformationInput = d3.select('#transformation-input');
+  const applyButton = d3.select('#apply-transform');
+  const customImage = d3.select('#custom-image');
+  const generatedUrl = d3.select('#generated-url');
+  const exampleButtons = d3.selectAll('.example-btn');
+
+  // Base Cloudinary URL
+  const baseUrl = 'https://res.cloudinary.com/dr60nybtj/image/upload';
+  const imageId = 'v1751747260/float3_kamv1f.png';
+
+  // Function to generate Cloudinary URL
+  function generateCloudinaryUrl(transformations) {
+    if (!transformations || transformations.trim() === '') {
+      return `${baseUrl}/${imageId}`;
+    }
+    return `${baseUrl}/${transformations}/${imageId}`;
+  }
+
+  // Function to update the custom image
+  function updateCustomImage(transformations) {
+    const url = generateCloudinaryUrl(transformations);
+    
+    // Update the URL display
+    generatedUrl.text(url);
+    
+    // Update the image with a smooth transition
+    customImage
+      .transition()
+      .duration(300)
+      .style('opacity', 0)
+      .on('end', function() {
+        d3.select(this)
+          .attr('src', url)
+          .transition()
+          .duration(300)
+          .style('opacity', 1);
+      });
+  }
+
+  // Handle Apply button click
+  applyButton.on('click', function() {
+    const transformations = transformationInput.property('value');
+    updateCustomImage(transformations);
+  });
+
+  // Handle Enter key in textarea
+  transformationInput.on('keydown', function(event) {
+    if (event.key === 'Enter' && event.ctrlKey) {
+      const transformations = transformationInput.property('value');
+      updateCustomImage(transformations);
+    }
+  });
+
+  // Handle example button clicks
+  exampleButtons.on('click', function() {
+    const transform = d3.select(this).attr('data-transform');
+    transformationInput.property('value', transform);
+    updateCustomImage(transform);
+  });
+
+  // Initialize with a default transformation
+  const defaultTransform = 'e_cartoonify:70:80';
+  transformationInput.property('value', defaultTransform);
+  updateCustomImage(defaultTransform);
+
 }); 
