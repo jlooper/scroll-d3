@@ -255,4 +255,95 @@ document.addEventListener('DOMContentLoaded', function() {
   transformationInput.property('value', defaultTransform);
   updateCustomImage(defaultTransform);
 
+});
+
+// Quiz functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const submitQuizBtn = document.getElementById('submit-quiz');
+  const quizResults = document.getElementById('quiz-results');
+  const quizScore = document.getElementById('quiz-score');
+  const quizMessage = document.getElementById('quiz-message');
+  const swagReward = document.getElementById('swag-reward');
+  const retakeQuizBtn = document.getElementById('retake-quiz');
+
+  // Correct answers
+  const correctAnswers = {
+    q1: 'a', // e_cartoonify
+    q2: 'b', // e_brightness
+    q3: 'b', // Applies an aurora borealis effect to the image
+    q4: 'c', // Using slashes
+    q5: 'b'  // e_background_removal
+  };
+
+  // Submit quiz
+  submitQuizBtn.addEventListener('click', function() {
+    let score = 0;
+    const totalQuestions = 5;
+    
+    // Check each question
+    for (let i = 1; i <= totalQuestions; i++) {
+      const selectedAnswer = document.querySelector(`input[name="q${i}"]:checked`);
+      if (selectedAnswer && selectedAnswer.value === correctAnswers[`q${i}`]) {
+        score++;
+      }
+    }
+
+    // Calculate percentage
+    const percentage = (score / totalQuestions) * 100;
+    
+    // Display results
+    quizScore.textContent = `Score: ${score}/${totalQuestions} (${percentage}%)`;
+    
+    if (score === totalQuestions) {
+      quizMessage.textContent = "🎉 Perfect! You're a Cloudinary expert!";
+      quizMessage.className = "text-lg mb-6 text-green-400 font-semibold";
+      swagReward.classList.remove('hidden');
+    } else if (score >= 3) {
+      quizMessage.textContent = "👍 Good job! You know your Cloudinary transformations!";
+      quizMessage.className = "text-lg mb-6 text-yellow-400 font-semibold";
+    } else {
+      quizMessage.textContent = "📚 Keep learning! Review the transformations above and try again!";
+      quizMessage.className = "text-lg mb-6 text-red-400 font-semibold";
+    }
+    
+    // Show results
+    quizResults.classList.remove('hidden');
+    
+    // Scroll to results
+    quizResults.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // Retake quiz
+  retakeQuizBtn.addEventListener('click', function() {
+    // Reset all radio buttons
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+      radio.checked = false;
+    });
+    
+    // Hide results
+    quizResults.classList.add('hidden');
+    swagReward.classList.add('hidden');
+    
+    // Scroll to top of quiz
+    document.getElementById('quiz-container').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // Add visual feedback for selected answers
+  document.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      // Remove previous selections from this question
+      const questionDiv = this.closest('.quiz-question');
+      questionDiv.querySelectorAll('label').forEach(label => {
+        label.classList.remove('bg-green-600/30', 'border-green-500');
+        label.classList.add('bg-gray-700/50');
+      });
+      
+      // Highlight selected answer
+      if (this.checked) {
+        const selectedLabel = this.closest('label');
+        selectedLabel.classList.remove('bg-gray-700/50');
+        selectedLabel.classList.add('bg-green-600/30', 'border-green-500');
+      }
+    });
+  });
 }); 
