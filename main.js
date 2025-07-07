@@ -228,6 +228,81 @@ document.addEventListener('DOMContentLoaded', function() {
       .style('opacity', 1);
   }
 
+  // Constants for code highlight functionality
+  const HIGHLIGHT_CONFIG = {
+    THRESHOLD: 0.5,           // Trigger when 50% visible
+    ROOT_MARGIN: '0px 0px -25% 0px',
+    ANIMATION_DELAY: 500,      // Delay for dramatic effect (ms)
+    TRANSITION_DURATION: 500   // CSS transition duration (ms)
+  };
+
+  // Configuration for scroll-triggered code highlights
+  // Each section gets a unique highlight color when scrolled to 50% visibility
+  const highlightConfigs = [
+    {
+      sectionIndex: '1',
+      highlightClass: 'code-highlight',
+      triggered: false,
+      description: 'Background Removal - Yellow highlight'
+    },
+    {
+      sectionIndex: '2', 
+      highlightClass: 'code-highlight-2',
+      triggered: false,
+      description: 'Generative Colorize - Orange highlight'
+    },
+    {
+      sectionIndex: '3',
+      highlightClass: 'code-highlight-3',
+      triggered: false,
+      description: 'Aurora Effect - Purple highlight'
+    },
+    {
+      sectionIndex: '4',
+      highlightClass: 'code-highlight-4',
+      triggered: false,
+      description: 'Opacity - Blue highlight'
+    },
+    {
+      sectionIndex: '5',
+      highlightClass: 'code-highlight-5',
+      triggered: false,
+      description: 'Generative Background Replace - Green highlight'
+    },
+    {
+      sectionIndex: '6',
+      highlightClass: 'code-highlight-6',
+      triggered: false,
+      description: 'Pixelate - Red highlight'
+    }
+  ];
+
+  // Create intersection observers for each code highlight
+  highlightConfigs.forEach(config => {
+    const codeHighlight = d3.select(`.${config.highlightClass}`);
+    const section = d3.select(`[data-index="${config.sectionIndex}"]`).node();
+    
+    if (section && codeHighlight.node()) {
+      const observer = new window.IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !config.triggered) {
+            // Trigger highlight with dramatic delay
+            setTimeout(() => {
+              codeHighlight.classed('highlighted', true);
+              config.triggered = true;
+              console.log(`Highlight triggered: ${config.description}`);
+            }, HIGHLIGHT_CONFIG.ANIMATION_DELAY);
+          }
+        });
+      }, {
+        threshold: HIGHLIGHT_CONFIG.THRESHOLD,
+        rootMargin: HIGHLIGHT_CONFIG.ROOT_MARGIN
+      });
+      
+      observer.observe(section);
+    }
+  });
+
   // Interactive Transformation Section
   const transformationInput = d3.select('#transformation-input');
   const applyButton = d3.select('#apply-transform');

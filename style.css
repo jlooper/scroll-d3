@@ -67,6 +67,36 @@ body {
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
+/* Code highlight animation - Base styles for all highlights */
+[class^="code-highlight"] {
+  @apply bg-transparent text-green-300 px-1 rounded transition-all duration-500;
+}
+
+/* Individual highlight colors for different sections */
+.code-highlight.highlighted {
+  @apply bg-yellow-500/50 text-yellow-100 font-semibold;
+}
+
+.code-highlight-2.highlighted {
+  @apply bg-orange-500/50 text-orange-100 font-semibold;
+}
+
+.code-highlight-3.highlighted {
+  @apply bg-purple-500/50 text-purple-100 font-semibold;
+}
+
+.code-highlight-4.highlighted {
+  @apply bg-blue-500/50 text-blue-100 font-semibold;
+}
+
+.code-highlight-5.highlighted {
+  @apply bg-green-500/50 text-green-100 font-semibold;
+}
+
+.code-highlight-6.highlighted {
+  @apply bg-red-500/50 text-red-100 font-semibold;
+}
+
 /* Mobile adjustments */
 @media (max-width: 1024px) {
   #scrolly-container {
