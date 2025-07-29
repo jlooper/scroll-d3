@@ -5,13 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Check if we're on desktop (large screen)
   const isDesktop = window.innerWidth >= 1024; // lg breakpoint
-  
-  // Debug logging
-  console.log('Screen width:', window.innerWidth);
-  console.log('Is desktop:', isDesktop);
-  console.log('Main image found:', mainImage.node());
-  console.log('Steps found:', steps.nodes().length);
-  console.log('Section images found:', sectionImages.nodes().length);
+
 
   // Starfield effect
   const canvas = d3.select('#starfield').node();
@@ -116,7 +110,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Function to handle image transitions with responsive support
   function handleImageTransition(imgElement, imgUrl, isFirstImage = false) {
-    console.log('Handling image transition:', imgUrl, 'isFirstImage:', isFirstImage);
     
     // Find the corresponding loader
     const imgContainer = d3.select(imgElement.parentNode);
@@ -190,7 +183,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const observer = new window.IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        console.log('Step intersecting:', entry.target.dataset.index);
         
         steps.classed('active', false);
         const step = d3.select(entry.target);
@@ -199,7 +191,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Get the image URL from the step
         const imgUrl = step.attr('data-img');
         if (imgUrl) {
-          console.log('Image URL:', imgUrl, 'Is desktop:', isDesktop);
           
           // Check if we're on desktop or mobile
           if (isDesktop && mainImage.node()) {
