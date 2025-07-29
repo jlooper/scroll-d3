@@ -189,4 +189,24 @@ body {
     opacity: 1;
     transform: translateY(-50%) scale(1);
   }
+}
+
+/* URL breakdown highlighting - explicit colors for production */
+.url-breakdown .text-blue-300 {
+  color: #93c5fd !important; /* blue-300 */
+}
+
+.url-breakdown .text-yellow-300 {
+  color: #fde047 !important; /* yellow-300 */
+  font-weight: 600 !important;
+}
+
+/* Fallback for when Tailwind classes are purged */
+.url-breakdown-blue {
+  color: #93c5fd !important;
+}
+
+.url-breakdown-yellow {
+  color: #fde047 !important;
+  font-weight: 600 !important;
 } 

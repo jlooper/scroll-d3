@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateUrlBreakdown(transformations) {
     const urlBreakdown = d3.select('#generated-url-breakdown');
     const baseUrlPart = 'https://res.cloudinary.com/dr60nybtj/image/upload/';
-    const imageIdPart = '/v1751747260/float3_kamv1f.png';
+    const imageIdPart = '/v1753806078/float3_kamv1f.png';
     
     let transformationPart = 'f_auto/q_auto';
     if (transformations && transformations.trim() !== '') {
@@ -259,9 +259,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     urlBreakdown.html(`
-      <span class="text-blue-300">${baseUrlPart}</span>
-      <span class="text-yellow-300 font-semibold">${transformationPart}</span>
-      <span class="text-blue-300">${imageIdPart}</span>
+      <span class="text-blue-300 url-breakdown-blue">${baseUrlPart}</span>
+      <span class="text-yellow-300 font-semibold url-breakdown-yellow">${transformationPart}</span>
+      <span class="text-blue-300 url-breakdown-blue">${imageIdPart}</span>
     `);
   }
 
