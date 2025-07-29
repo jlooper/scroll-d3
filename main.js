@@ -118,6 +118,10 @@ document.addEventListener('DOMContentLoaded', function() {
   function handleImageTransition(imgElement, imgUrl, isFirstImage = false) {
     console.log('Handling image transition:', imgUrl, 'isFirstImage:', isFirstImage);
     
+    // Find the corresponding loader
+    const imgContainer = d3.select(imgElement.parentNode);
+    const loader = imgContainer.select('.section-image-loader, #main-image-loader, #custom-image-loader');
+    
     if (isFirstImage) {
       // First image - fade in with responsive srcset
       const urls = generateScrollyResponsiveUrls(imgUrl);
@@ -132,6 +136,9 @@ document.addEventListener('DOMContentLoaded', function() {
         .style('transform', 'scale(1) rotate(0deg)')
         .style('filter', 'blur(0px) brightness(1)');
     } else {
+      // Show loader
+      loader.style('opacity', 1);
+      
       // Subsequent images - dramatic transition with responsive srcset
       d3.select(imgElement)
         .transition()
@@ -163,6 +170,9 @@ document.addEventListener('DOMContentLoaded', function() {
             .style('transform', 'scale(1) rotate(0deg)')
             .style('filter', 'blur(0px) brightness(1)')
             .on('end', function() {
+              // Hide loader
+              loader.style('opacity', 0);
+              
               // Add a subtle bounce effect
               d3.select(imgElement)
                 .transition()
@@ -232,7 +242,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const transformationInput = d3.select('#transformation-input');
   const applyButton = d3.select('#apply-transform');
   const customImage = d3.select('#custom-image');
-  const generatedUrl = d3.select('#generated-url');
   const exampleButtons = d3.selectAll('.example-btn');
 
   // Base Cloudinary URL
@@ -247,12 +256,34 @@ document.addEventListener('DOMContentLoaded', function() {
     return `${baseUrl}/${transformations}/f_auto/q_auto/${imageId}`;
   }
 
+  // Function to update the URL breakdown display
+  function updateUrlBreakdown(transformations) {
+    const urlBreakdown = d3.select('#generated-url-breakdown');
+    const baseUrlPart = 'https://res.cloudinary.com/dr60nybtj/image/upload/';
+    const imageIdPart = '/v1751747260/float3_kamv1f.png';
+    
+    let transformationPart = 'f_auto/q_auto';
+    if (transformations && transformations.trim() !== '') {
+      transformationPart = `${transformations}/f_auto/q_auto`;
+    }
+    
+    urlBreakdown.html(`
+      <span class="text-blue-300">${baseUrlPart}</span>
+      <span class="text-yellow-300 font-semibold">${transformationPart}</span>
+      <span class="text-blue-300">${imageIdPart}</span>
+    `);
+  }
+
   // Function to update the custom image with responsive handling
   function updateCustomImage(transformations) {
     const url = generateCloudinaryUrl(transformations);
     
-    // Update the URL display
-    generatedUrl.text(url);
+    // Update the URL breakdown display
+    updateUrlBreakdown(transformations);
+    
+    // Show loader
+    const customImageLoader = d3.select('#custom-image-loader');
+    customImageLoader.style('opacity', 1);
     
     // Update the image with responsive srcset and smooth transition
     customImage
@@ -264,7 +295,11 @@ document.addEventListener('DOMContentLoaded', function() {
         d3.select(this)
           .transition()
           .duration(300)
-          .style('opacity', 1);
+          .style('opacity', 1)
+          .on('end', function() {
+            // Hide loader after image loads
+            customImageLoader.style('opacity', 0);
+          });
       });
   }
 
