@@ -77,4 +77,116 @@ body {
     height: 50vh;
     position: relative;
   }
+}
+
+/* Space animation styles for congratulations box */
+.floating-star {
+  position: absolute;
+  font-size: 1.5rem;
+  animation: float 3s ease-in-out infinite;
+  opacity: 0.8;
+}
+
+.star-1 {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.star-2 {
+  top: 30%;
+  right: 15%;
+  animation-delay: 0.5s;
+}
+
+.star-3 {
+  bottom: 30%;
+  left: 20%;
+  animation-delay: 1s;
+}
+
+.star-4 {
+  bottom: 20%;
+  right: 25%;
+  animation-delay: 1.5s;
+}
+
+.star-5 {
+  top: 50%;
+  left: 5%;
+  animation-delay: 2s;
+}
+
+.star-6 {
+  top: 60%;
+  right: 10%;
+  animation-delay: 2.5s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-10px) rotate(180deg);
+    opacity: 1;
+  }
+}
+
+.rocket-animation {
+  animation: rocket-launch 4s ease-in-out infinite;
+}
+
+@keyframes rocket-launch {
+  0%, 100% {
+    transform: translateY(0px) rotate(-15deg);
+  }
+  25% {
+    transform: translateY(-5px) rotate(-10deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-5deg);
+  }
+  75% {
+    transform: translateY(-5px) rotate(-10deg);
+  }
+}
+
+/* Sparkle effect for the congratulations text */
+.congratulations-sparkle {
+  position: relative;
+}
+
+.congratulations-sparkle::before,
+.congratulations-sparkle::after {
+  content: '✨';
+  position: absolute;
+  font-size: 0.8rem;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.congratulations-sparkle::before {
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  animation-delay: 0s;
+}
+
+.congratulations-sparkle::after {
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  animation-delay: 1s;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
 } 

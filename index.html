@@ -146,11 +146,11 @@
           </section>
           
           <section class="step bg-transparent rounded-xl p-6 lg:p-8 min-h-64 lg:min-h-64 flex flex-col lg:flex-row items-center justify-center transition-all duration-300 " 
-                   data-index="2" data-img="https://res.cloudinary.com/dr60nybtj/image/upload/e_background_removal/e_gen_recolor:prompt_space_suit;to-color_pink/f_auto/q_auto/v1751747260/float3_kamv1f.png">
+                   data-index="2" data-img="https://res.cloudinary.com/dr60nybtj/image/upload/e_gen_recolor:prompt_space_suit;to-color_pink/e_background_removal/f_auto/q_auto/v1751747260/float3_kamv1f.png">
             <!-- Mobile Image (hidden on desktop) -->
             <div class="w-full max-w-sm mb-6 lg:hidden relative">
               <img class="section-image w-full rounded-xl object-cover opacity-0" 
-                   src="https://res.cloudinary.com/dr60nybtj/image/upload/e_background_removal/e_gen_recolor:prompt_space_suit;to-color_pink/f_auto/q_auto/v1751747260/float3_kamv1f.png" 
+                   src="https://res.cloudinary.com/dr60nybtj/image/upload/e_gen_recolor:prompt_space_suit;to-color_pink/e_background_removal/f_auto/q_auto/v1751747260/float3_kamv1f.png" 
                    alt="Scrollytelling Image">
               <!-- Loader overlay -->
               <div class="section-image-loader absolute inset-0 bg-gray-900/80 rounded-xl flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none">
@@ -164,7 +164,7 @@
               <p class="text-gray-300 leading-relaxed mb-4">Let's reinvent myself!</p>
               <div class="url-breakdown bg-gray-800/50 px-3 py-2 rounded text-xs">
                 <span class="text-blue-300">https://res.cloudinary.com/dr60nybtj/image/upload/</span>
-                <span class="text-yellow-300 font-semibold">e_background_removal/e_gen_recolor:prompt_space_suit;to-color_pink/f_auto/q_auto</span>
+                <span class="text-yellow-300 font-semibold">e_gen_recolor:prompt_space_suit;to-color_pink/e_background_removal/f_auto/q_auto</span>
                 <span class="text-blue-300">/v1751747260/float3_kamv1f.png</span>
               </div>
             </div>
@@ -495,10 +495,35 @@
             <div id="quiz-score" class="text-2xl font-bold mb-4"></div>
             <div id="quiz-message" class="text-lg mb-6"></div>
             <div id="swag-reward" class="hidden">
-              <div class="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/50 rounded-lg p-6 mb-6">
-                <h3 class="text-xl font-bold text-yellow-400 mb-4">🏆 Congratulations!</h3>
-                <p class="text-gray-300 mb-4">You've earned the Cloudinary Swag Pack</p>
-                          </div>
+              <div class="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/50 rounded-lg p-6 mb-6 relative overflow-hidden">
+                <!-- Space animation background -->
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-900/30 to-blue-900/30"></div>
+                
+                <!-- Floating stars animation -->
+                <div class="absolute inset-0">
+                  <div class="floating-star star-1">⭐</div>
+                  <div class="floating-star star-2">✨</div>
+                  <div class="floating-star star-3">🌟</div>
+                  <div class="floating-star star-4">💫</div>
+                  <div class="floating-star star-5">⭐</div>
+                  <div class="floating-star star-6">✨</div>
+                </div>
+                
+                <!-- Main content -->
+                <div class="relative z-10">
+                  <h3 class="text-xl font-bold text-yellow-400 mb-4 flex items-center justify-center congratulations-sparkle">
+                    <span class="mr-2">🏆</span>
+                    <span class="animate-pulse">Congratulations!</span>
+                    <span class="ml-2">🏆</span>
+                  </h3>
+                  <p class="text-gray-300 mb-4">You've earned Cloudinary Swag!</p>
+                  <div class="flex justify-center space-x-4 text-2xl">
+                    <span class="animate-bounce">🎁</span>
+                    <span class="animate-bounce" style="animation-delay: 0.2s;">🎯</span>
+                    <span class="animate-bounce" style="animation-delay: 0.4s;">⭐</span>
+                  </div>
+                </div>
+              </div>
             </div>
             <button id="retake-quiz" class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
               Take Quiz Again

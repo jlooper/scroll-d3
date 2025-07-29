@@ -417,11 +417,36 @@ document.addEventListener('DOMContentLoaded', function() {
     let score = 0;
     const totalQuestions = 5;
     
-    // Check each question
+    // Reset all visual feedback first
+    document.querySelectorAll('.quiz-question').forEach(question => {
+      question.classList.remove('border-red-500', 'border-green-500');
+      question.querySelectorAll('label').forEach(label => {
+        label.classList.remove('bg-red-600/30', 'border-red-500', 'bg-green-600/30', 'border-green-500');
+        label.classList.add('bg-gray-700/50');
+      });
+    });
+    
+    // Check each question and highlight only wrong answers
     for (let i = 1; i <= totalQuestions; i++) {
       const selectedAnswer = document.querySelector(`input[name="q${i}"]:checked`);
-      if (selectedAnswer && selectedAnswer.value === correctAnswers[`q${i}`]) {
-        score++;
+      const questionDiv = document.querySelector(`[data-question="${i}"]`);
+      
+      if (selectedAnswer) {
+        const isCorrect = selectedAnswer.value === correctAnswers[`q${i}`];
+        const selectedLabel = selectedAnswer.closest('label');
+        
+        if (isCorrect) {
+          score++;
+          // Don't highlight correct answers - let users discover them through retakes
+        } else {
+          // Highlight wrong answer in red
+          selectedLabel.classList.remove('bg-gray-700/50');
+          selectedLabel.classList.add('bg-red-600/30', 'border-red-500');
+          questionDiv.classList.add('border-red-500');
+        }
+      } else {
+        // No answer selected - mark as wrong but don't show correct answer
+        questionDiv.classList.add('border-red-500');
       }
     }
 
@@ -457,6 +482,15 @@ document.addEventListener('DOMContentLoaded', function() {
       radio.checked = false;
     });
     
+    // Reset all visual feedback
+    document.querySelectorAll('.quiz-question').forEach(question => {
+      question.classList.remove('border-red-500', 'border-green-500');
+      question.querySelectorAll('label').forEach(label => {
+        label.classList.remove('bg-red-600/30', 'border-red-500', 'bg-green-600/30', 'border-green-500');
+        label.classList.add('bg-gray-700/50');
+      });
+    });
+    
     // Hide results
     quizResults.classList.add('hidden');
     swagReward.classList.add('hidden');
@@ -465,21 +499,24 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('quiz-container').scrollIntoView({ behavior: 'smooth' });
   });
 
-  // Add visual feedback for selected answers
+  // Add visual feedback for selected answers (only when quiz hasn't been submitted)
   document.querySelectorAll('input[type="radio"]').forEach(radio => {
     radio.addEventListener('change', function() {
-      // Remove previous selections from this question
-      const questionDiv = this.closest('.quiz-question');
-      questionDiv.querySelectorAll('label').forEach(label => {
-        label.classList.remove('bg-green-600/30', 'border-green-500');
-        label.classList.add('bg-gray-700/50');
-      });
-      
-      // Highlight selected answer
-      if (this.checked) {
-        const selectedLabel = this.closest('label');
-        selectedLabel.classList.remove('bg-gray-700/50');
-        selectedLabel.classList.add('bg-green-600/30', 'border-green-500');
+      // Only show selection feedback if quiz hasn't been submitted
+      if (quizResults.classList.contains('hidden')) {
+        // Remove previous selections from this question
+        const questionDiv = this.closest('.quiz-question');
+        questionDiv.querySelectorAll('label').forEach(label => {
+          label.classList.remove('bg-green-600/30', 'border-green-500');
+          label.classList.add('bg-gray-700/50');
+        });
+        
+        // Highlight selected answer
+        if (this.checked) {
+          const selectedLabel = this.closest('label');
+          selectedLabel.classList.remove('bg-gray-700/50');
+          selectedLabel.classList.add('bg-green-600/30', 'border-green-500');
+        }
       }
     });
   });
