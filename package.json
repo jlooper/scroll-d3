@@ -8,7 +8,10 @@
     "serve": "serve . -l 3000",
     "watch:css": "tailwindcss -i ./style.css -o ./dist/output.css --watch",
     "build:css": "tailwindcss -i ./style.css -o ./dist/output.css --watch",
-    "build": "tailwindcss -i ./style.css -o ./dist/output.css --minify"
+    "build": "tailwindcss -i ./style.css -o ./dist/output.css --minify",
+    "build:test": "npm run build && npm run serve:prod",
+    "serve:prod": "serve . -l 3001",
+    "test:build": "npm run build && echo '✅ Build complete! Testing at http://localhost:3001' && npm run serve:prod"
   },
   "keywords": [
     "d3",

@@ -425,8 +425,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Initialize images
+  // Initialize sections first, then images
+  generateAllSections();
   initializeImages();
+  initializeUrlBreakdowns();
+  
+  // Check URL parameter for quiz visibility
+  checkQuizVisibility();
 
 });
 
@@ -647,23 +652,6 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
   }
 
-  // Function to generate all sections dynamically
-  function generateAllSections() {
-    const scrollyContainer = d3.select('#scrolly-container');
-    
-    // Clear existing sections (except any static ones)
-    scrollyContainer.selectAll('.step').remove();
-    
-    // Generate and append all sections
-    sectionsData.forEach(section => {
-      const sectionHTML = generateSectionHTML(section);
-      scrollyContainer.append('div').html(sectionHTML);
-    });
-  }
-
-  // Generate sections on page load
-  generateAllSections();
-  
   // Check URL parameter for quiz visibility
   function checkQuizVisibility() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -679,6 +667,17 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   }
-  
-  // Initialize quiz visibility
-  checkQuizVisibility(); 
+
+  // Function to generate all sections dynamically
+  function generateAllSections() {
+    const scrollyContainer = d3.select('#scrolly-container');
+    
+    // Clear existing sections (except any static ones)
+    scrollyContainer.selectAll('.step').remove();
+    
+    // Generate and append all sections
+    sectionsData.forEach(section => {
+      const sectionHTML = generateSectionHTML(section);
+      scrollyContainer.append('div').html(sectionHTML);
+    });
+  } 
