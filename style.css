@@ -191,22 +191,25 @@ body {
   }
 }
 
-/* URL breakdown highlighting - explicit colors for production */
-.url-breakdown .text-blue-300 {
-  color: #93c5fd !important; /* blue-300 */
+/* URL breakdown text wrapping */
+.url-breakdown {
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.4;
+  overflow-wrap: break-word;
 }
 
+.url-breakdown span {
+  display: inline;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Ensure long transformation parameters wrap properly */
 .url-breakdown .text-yellow-300 {
-  color: #fde047 !important; /* yellow-300 */
-  font-weight: 600 !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
-/* Fallback for when Tailwind classes are purged */
-.url-breakdown-blue {
-  color: #93c5fd !important;
-}
-
-.url-breakdown-yellow {
-  color: #fde047 !important;
-  font-weight: 600 !important;
-} 

@@ -98,6 +98,10 @@ This demo showcases various Cloudinary transformations:
 - **Intersection Observer API** - Scroll detection
 - **Netlify** - Hosting and deployment
 
+## Quiz
+
+There's a simple quiz at the bottom if you want to use this form to award prizes. If the user gets 100% they can show the booth worker and get a prize. Add ?quiz=true to the URL to show the quiz.
+
 ## License
 
 MIT License - feel free to use this template for your own projects! 

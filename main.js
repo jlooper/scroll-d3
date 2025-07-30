@@ -6,6 +6,33 @@ document.addEventListener('DOMContentLoaded', function() {
   // Check if we're on desktop (large screen)
   const isDesktop = window.innerWidth >= 1024; // lg breakpoint
 
+  // Utility function to create URL breakdown with colors
+  function createUrlBreakdown(baseUrl, transformations, imageId, options = {}) {
+    const {
+      baseUrlClass = 'text-blue-300',
+      transformationClass = 'text-black bg-yellow-300 font-semibold rounded-md px-1',
+      imageIdClass = 'text-blue-300',
+      baseUrlText = 'https://res.cloudinary.com/dr60nybtj/image/upload/',
+      imageIdText = '/v1753899977/float3_kamv1f.png',
+      transformationText = 'f_auto/q_auto'
+    } = options;
+    
+    const finalBaseUrl = baseUrl || baseUrlText;
+    const finalImageId = imageId || imageIdText;
+    const finalTransformations = transformations || transformationText;
+    
+    return `
+      <span class="${baseUrlClass}">${finalBaseUrl}</span>
+      <span class="${transformationClass}">${finalTransformations}</span>
+      <span class="${imageIdClass}">${finalImageId}</span>
+    `;
+  }
+
+  // Function to update URL breakdown display
+  function updateUrlBreakdownDisplay(container, baseUrl, transformations, imageId, options = {}) {
+    const html = createUrlBreakdown(baseUrl, transformations, imageId, options);
+    d3.select(container).html(html);
+  }
 
   // Starfield effect
   const canvas = d3.select('#starfield').node();
@@ -80,36 +107,10 @@ document.addEventListener('DOMContentLoaded', function() {
   
   animateStars();
 
-  // Function to generate responsive URLs for scrollytelling images
-  function generateScrollyResponsiveUrls(baseUrl) {
-    // Extract the base URL without the image ID
-    const urlParts = baseUrl.split('/');
-    const imageIdIndex = urlParts.findIndex(part => part.startsWith('v'));
-    
-    if (imageIdIndex === -1) {
-      // Fallback if we can't find the image ID
-      return {
-        small: `${baseUrl}`,
-        medium: `${baseUrl}`,
-        large: `${baseUrl}`,
-        xlarge: `${baseUrl}`
-      };
-    }
-    
-    // Get the base URL up to the transformations
-    const baseUrlWithoutImage = urlParts.slice(0, imageIdIndex).join('/');
-    const imageId = urlParts.slice(imageIdIndex).join('/');
-    
-    return {
-      small: `${baseUrlWithoutImage}/w_300,dpr_auto/f_auto/q_auto/${imageId}`,
-      medium: `${baseUrlWithoutImage}/w_600,dpr_auto/f_auto/q_auto/${imageId}`,
-      large: `${baseUrlWithoutImage}/w_900,dpr_auto/f_auto/q_auto/${imageId}`,
-      xlarge: `${baseUrlWithoutImage}/w_1200,dpr_auto/f_auto/q_auto/${imageId}`
-    };
-  }
+
 
   // Function to handle image transitions with responsive support
-  function handleImageTransition(imgElement, imgUrl, isFirstImage = false) {
+  function handleImageTransition(imgElement, imgUrl, transform, isFirstImage = false) {
     
     // Find the corresponding loader
     const imgContainer = d3.select(imgElement.parentNode);
@@ -117,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (isFirstImage) {
       // First image - fade in with responsive srcset
-      const urls = generateScrollyResponsiveUrls(imgUrl);
+      const urls = generateResponsiveUrls(transform);
       const srcset = `${urls.small} 300w, ${urls.medium} 600w, ${urls.large} 900w, ${urls.xlarge} 1200w`;
       
       d3.select(imgElement)
@@ -141,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .style('filter', 'blur(8px) brightness(0.5)')
         .on('end', function() {
           // Update image with responsive srcset
-          const urls = generateScrollyResponsiveUrls(imgUrl);
+          const urls = generateResponsiveUrls(transform);
           const srcset = `${urls.small} 300w, ${urls.medium} 600w, ${urls.large} 900w, ${urls.xlarge} 1200w`;
           
           d3.select(imgElement)
@@ -188,9 +189,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const step = d3.select(entry.target);
         step.classed('active', true);
         
-        // Get the image URL from the step
-        const imgUrl = step.attr('data-img');
-        if (imgUrl) {
+        // Get the transformation from the step
+        const transform = step.attr('data-transform');
+        if (transform) {
+          // Generate the image URL from the transformation
+          const imgUrl = generateCloudinaryUrl(transform);
           
           // Check if we're on desktop or mobile
           if (isDesktop && mainImage.node()) {
@@ -198,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Updating desktop main image');
             const currentSrc = mainImage.attr('src');
             const isFirstImage = !currentSrc || currentSrc === imgUrl;
-            handleImageTransition(mainImage.node(), imgUrl, isFirstImage);
+            handleImageTransition(mainImage.node(), imgUrl, transform, isFirstImage);
           } else {
             // Mobile: update the section image within this step
             const stepImage = step.select('.section-image');
@@ -206,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
               console.log('Updating mobile section image');
               const currentOpacity = d3.select(stepImage.node()).style('opacity');
               const isFirstImage = currentOpacity === '0' || currentOpacity === '';
-              handleImageTransition(stepImage.node(), imgUrl, isFirstImage);
+              handleImageTransition(stepImage.node(), imgUrl, transform, isFirstImage);
             }
           }
         }
@@ -237,32 +240,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Base Cloudinary URL
   const baseUrl = 'https://res.cloudinary.com/dr60nybtj/image/upload';
-  const imageId = 'v1751747260/float3_kamv1f.png';
+  const imageId = 'v1753899977/float3_kamv1f.png';
 
-  // Function to generate Cloudinary URL with automatic optimization
+  // Function to generate Cloudinary URL
   function generateCloudinaryUrl(transformations) {
+    let url;
     if (!transformations || transformations.trim() === '') {
-      return `${baseUrl}/f_auto/q_auto/${imageId}`;
+      url = `${baseUrl}/${imageId}`;
+    } else {
+      url = `${baseUrl}/${transformations}/${imageId}`;
     }
-    return `${baseUrl}/${transformations}/f_auto/q_auto/${imageId}`;
+    return url;
   }
 
   // Function to update the URL breakdown display
   function updateUrlBreakdown(transformations) {
-    const urlBreakdown = d3.select('#generated-url-breakdown');
-    const baseUrlPart = 'https://res.cloudinary.com/dr60nybtj/image/upload/';
-    const imageIdPart = '/v1753806078/float3_kamv1f.png';
+    let transformationPart = transformations || '';
     
-    let transformationPart = 'f_auto/q_auto';
-    if (transformations && transformations.trim() !== '') {
-      transformationPart = `${transformations}/f_auto/q_auto`;
-    }
-    
-    urlBreakdown.html(`
-      <span class="text-blue-300 url-breakdown-blue">${baseUrlPart}</span>
-      <span class="text-yellow-300 font-semibold url-breakdown-yellow">${transformationPart}</span>
-      <span class="text-blue-300 url-breakdown-blue">${imageIdPart}</span>
-    `);
+    updateUrlBreakdownDisplay('#generated-url-breakdown', null, transformationPart, null);
   }
 
   // Function to update the custom image with responsive handling
@@ -356,14 +351,14 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCustomImage(transform);
   });
 
-  // Function to generate responsive image URLs with DPR awareness
+  // Function to generate responsive image URLs using Cloudinary's auto features
   function generateResponsiveUrls(transformations) {
     const baseTransform = transformations ? `${transformations}/` : '';
     return {
-      small: `${baseUrl}/${baseTransform}w_300,dpr_auto/f_auto/q_auto/${imageId}`,
-      medium: `${baseUrl}/${baseTransform}w_600,dpr_auto/f_auto/q_auto/${imageId}`,
-      large: `${baseUrl}/${baseTransform}w_900,dpr_auto/f_auto/q_auto/${imageId}`,
-      xlarge: `${baseUrl}/${baseTransform}w_1200,dpr_auto/f_auto/q_auto/${imageId}`
+      small: `${baseUrl}/${baseTransform}w_300,dpr_auto,f_auto,q_auto/${imageId}`,
+      medium: `${baseUrl}/${baseTransform}w_600,dpr_auto,f_auto,q_auto/${imageId}`,
+      large: `${baseUrl}/${baseTransform}w_900,dpr_auto,f_auto,q_auto/${imageId}`,
+      xlarge: `${baseUrl}/${baseTransform}w_1200,dpr_auto,f_auto,q_auto/${imageId}`
     };
   }
 
@@ -379,9 +374,59 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Initialize with a default transformation
-  const defaultTransform = 'e_cartoonify:70:80';
+  const defaultTransform = '';
   transformationInput.property('value', defaultTransform);
   updateCustomImage(defaultTransform);
+
+  // Initialize all URL breakdowns in the HTML
+  function initializeUrlBreakdowns() {
+    // Get transformations from data attributes
+    d3.selectAll('.step').each(function() {
+      const step = d3.select(this);
+      const transform = step.attr('data-transform');
+      const urlBreakdown = step.select('.url-breakdown');
+      
+      if (transform && urlBreakdown.size() > 0) {
+        updateUrlBreakdownDisplay(urlBreakdown.node(), null, transform, null);
+      }
+    });
+  }
+
+  // Initialize URL breakdowns
+  initializeUrlBreakdowns();
+
+  // Initialize all images with dynamic URLs
+  function initializeImages() {
+    // Initialize main image
+    const mainImage = d3.select('#main-image');
+    const mainImageUrl = generateCloudinaryUrl('f_auto/q_auto');
+    mainImage.attr('src', mainImageUrl);
+    mainImage.style('opacity', 1);
+    
+    // Initialize custom image (unoptimized)
+    const customImage = d3.select('#custom-image');
+    const customImageUrl = generateCloudinaryUrl('');
+    customImage.attr('src', customImageUrl);
+    customImage.style('opacity', 1);
+    
+    // Initialize all section images
+    d3.selectAll('.step').each(function() {
+      const step = d3.select(this);
+      const transform = step.attr('data-transform');
+      const sectionImage = step.select('.section-image');
+      
+      if (transform && sectionImage.size() > 0) {
+        const imageUrl = generateCloudinaryUrl(transform);
+        sectionImage.attr('src', imageUrl);
+        
+        // Make image visible after setting src
+        sectionImage.style('opacity', 1);
+      }
+    });
+  }
+
+  // Initialize images
+  initializeImages();
 
 });
 
@@ -512,3 +557,128 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 }); 
+
+  // Sections data - single source of truth for all transformations
+  const sectionsData = [
+    {
+      index: 0,
+      transform: 'f_auto/q_auto',
+      title: 'Optimized!',
+      description: 'This image was 726kb, now it\'s 77kb! It\'s now 89% smaller!',
+      alt: 'Optimized'
+    },
+    {
+      index: 1,
+      transform: 'e_background_removal/f_auto/q_auto',
+      title: 'Background Removal',
+      description: 'Space can feel isolating, so let\'s remove the background to make it feel more like home.',
+      alt: 'Background Removal'
+    },
+    {
+      index: 2,
+      transform: 'e_gen_recolor:prompt_space_suit;to-color_pink/e_background_removal/f_auto/q_auto',
+      title: 'Generative Colorize',
+      description: 'Let\'s reinvent myself!',
+      alt: 'Generative Colorize'
+    },
+    {
+      index: 3,
+      transform: 'e_art:aurora/e_background_removal/f_auto/q_auto',
+      title: 'Aurora Effect',
+      description: 'Woah! Solar flare!',
+      alt: 'Aurora Effect'
+    },
+    {
+      index: 4,
+      transform: 'e_background_removal/o_20/f_auto/q_auto',
+      title: 'Opacity',
+      description: 'I\'m feeling faint!',
+      alt: 'Opacity'
+    },
+    {
+      index: 5,
+      transform: 'e_gen_background_replace/f_auto/q_auto',
+      title: 'Generative Background Replace',
+      description: 'Where am I?',
+      alt: 'Generative Background Replace'
+    },
+    {
+      index: 6,
+      transform: 'e_pixelate:15/e_background_removal/f_auto/q_auto',
+      title: 'Pixelate',
+      description: 'I feel like going incognito. Let\'s add some pixels.',
+      alt: 'Pixelate'
+    }
+  ];
+
+  // Function to generate section HTML
+  function generateSectionHTML(section) {
+    return `
+      <section class="step bg-transparent rounded-xl p-6 lg:p-8 min-h-64 lg:min-h-64 flex flex-col lg:flex-row items-center justify-center transition-all duration-300" 
+               data-index="${section.index}" data-transform="${section.transform}">
+        <!-- Responsive Layout: Single image with responsive positioning -->
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between w-full lg:max-w-6xl">
+          <!-- Image Column -->
+          <div class="w-full max-w-sm lg:max-w-md mx-auto mb-6 lg:mb-0 lg:flex-1 lg:pr-8">
+            <div class="text-center">
+              <div class="relative">
+                <img class="section-image w-full rounded-xl object-cover opacity-0" 
+                     alt="${section.alt}">
+                <!-- Loader overlay -->
+                <div class="section-image-loader absolute inset-0 bg-gray-900/80 rounded-xl flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none">
+                  <div class="text-center">
+                    <div class="animate-spin rounded-full h-8 w-8 lg:h-12 lg:w-12 border-b-2 border-purple-500 mx-auto mb-2 lg:mb-4"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Content Column -->
+          <div class="lg:pl-8">
+            <div class="text text-lg text-gray-300 text-center lg:text-left max-w-2xl">
+              <h2 class="text-2xl font-bold text-white mb-4">${section.title}</h2>
+              <p class="text-gray-300 leading-relaxed mb-4">${section.description}</p>
+              <div class="url-breakdown bg-gray-800/50 px-3 py-2 rounded text-xs"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  // Function to generate all sections dynamically
+  function generateAllSections() {
+    const scrollyContainer = d3.select('#scrolly-container');
+    
+    // Clear existing sections (except any static ones)
+    scrollyContainer.selectAll('.step').remove();
+    
+    // Generate and append all sections
+    sectionsData.forEach(section => {
+      const sectionHTML = generateSectionHTML(section);
+      scrollyContainer.append('div').html(sectionHTML);
+    });
+  }
+
+  // Generate sections on page load
+  generateAllSections();
+  
+  // Check URL parameter for quiz visibility
+  function checkQuizVisibility() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const showQuiz = urlParams.get('quiz');
+    
+    // Find the quiz section by looking for the container with quiz questions
+    const quizSection = document.querySelector('#quiz-container').closest('.bg-gradient-to-br.from-purple-900.to-black');
+    if (quizSection) {
+      if (showQuiz === 'true' || showQuiz === '1') {
+        quizSection.style.display = 'block';
+      } else {
+        quizSection.style.display = 'none';
+      }
+    }
+  }
+  
+  // Initialize quiz visibility
+  checkQuizVisibility(); 
