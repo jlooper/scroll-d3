@@ -180,56 +180,62 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Single observer for all screen sizes
-  const observer = new window.IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        
-        steps.classed('active', false);
-        const step = d3.select(entry.target);
-        step.classed('active', true);
-        
-        // Get the transformation from the step
-        const transform = step.attr('data-transform');
-        if (transform) {
-          // Generate the image URL from the transformation
-          const imgUrl = generateCloudinaryUrl(transform);
+  // Function to set up Intersection Observer after sections are generated
+  function setupIntersectionObserver() {
+    const steps = d3.selectAll('.step');
+    const mainImage = d3.select('#main-image');
+    
+    // Single observer for all screen sizes
+    const observer = new window.IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
           
-          // Check if we're on desktop or mobile
-          if (isDesktop && mainImage.node()) {
-            // Desktop: update the sticky main image
-            console.log('Updating desktop main image');
-            const currentSrc = mainImage.attr('src');
-            const isFirstImage = !currentSrc || currentSrc === imgUrl;
-            handleImageTransition(mainImage.node(), imgUrl, transform, isFirstImage);
-          } else {
-            // Mobile: update the section image within this step
-            const stepImage = step.select('.section-image');
-            if (stepImage.node()) {
-              console.log('Updating mobile section image');
-              const currentOpacity = d3.select(stepImage.node()).style('opacity');
-              const isFirstImage = currentOpacity === '0' || currentOpacity === '';
-              handleImageTransition(stepImage.node(), imgUrl, transform, isFirstImage);
+          steps.classed('active', false);
+          const step = d3.select(entry.target);
+          step.classed('active', true);
+          
+          // Get the transformation from the step
+          const transform = step.attr('data-transform');
+          if (transform) {
+            // Generate the image URL from the transformation
+            const imgUrl = generateCloudinaryUrl(transform);
+            
+            // Check if we're on desktop or mobile
+            if (isDesktop && mainImage.node()) {
+              // Desktop: update the sticky main image
+              console.log('Updating desktop main image');
+              const currentSrc = mainImage.attr('src');
+              const isFirstImage = !currentSrc || currentSrc === imgUrl;
+              handleImageTransition(mainImage.node(), imgUrl, transform, isFirstImage);
+            } else {
+              // Mobile: update the section image within this step
+              const stepImage = step.select('.section-image');
+              if (stepImage.node()) {
+                console.log('Updating mobile section image');
+                const currentOpacity = d3.select(stepImage.node()).style('opacity');
+                const isFirstImage = currentOpacity === '0' || currentOpacity === '';
+                handleImageTransition(stepImage.node(), imgUrl, transform, isFirstImage);
+              }
             }
           }
         }
-      }
+      });
+    }, {
+      threshold: 0.6,
+      rootMargin: '0px 0px -15% 0px'
     });
-  }, {
-    threshold: 0.6,
-    rootMargin: '0px 0px -15% 0px'
-  });
 
-  // Observe all steps
-  steps.nodes().forEach(step => observer.observe(step));
-  
-  // Show the first image immediately on desktop
-  if (isDesktop && mainImage.node()) {
-    console.log('Showing first image on desktop');
-    mainImage
-      .transition()
-      .duration(1000)
-      .style('opacity', 1);
+    // Observe all steps
+    steps.nodes().forEach(step => observer.observe(step));
+    
+    // Show the first image immediately on desktop
+    if (isDesktop && mainImage.node()) {
+      console.log('Showing first image on desktop');
+      mainImage
+        .transition()
+        .duration(1000)
+        .style('opacity', 1);
+    }
   }
 
   // Interactive Transformation Section
@@ -429,6 +435,9 @@ document.addEventListener('DOMContentLoaded', function() {
   generateAllSections();
   initializeImages();
   initializeUrlBreakdowns();
+  
+  // Set up Intersection Observer after sections exist
+  setupIntersectionObserver();
   
   // Check URL parameter for quiz visibility
   checkQuizVisibility();
