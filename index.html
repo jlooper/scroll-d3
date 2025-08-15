@@ -198,28 +198,14 @@
     <!-- Cloudinary Quiz Section -->
     <div class="bg-gradient-to-br from-purple-900 to-black text-white py-20 relative z-10">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Choice Interface (Hidden initially) -->
-        <div id="choice-container" class="hidden text-center mb-12">
-          <h2 class="text-3xl md:text-4xl font-bold mb-4">Choose Your Prize!</h2>
-          <p class="text-lg text-gray-300 mb-8">What would you like to win today?</p>
-          
-          <!-- Tab Navigation -->
-          <div class="flex justify-center mb-8">
-            <button id="quiz-tab" class="tab-button active px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-l-lg transition-all duration-300 transform hover:scale-105 min-w-48 border-r border-blue-500">
-              🧦 Socks
-            </button>
-            <button id="marketo-tab" class="tab-button px-8 py-4 bg-gradient-to-r from-pink-600 to-yellow-600 text-white font-bold rounded-r-lg transition-all duration-300 transform hover:scale-105 min-w-48">
-              🦄 Unicorn
-            </button>
-          </div>
-        </div>
+
 
         <!-- Quiz Container (Hidden initially) -->
         <div id="quiz-section" class="hidden relative">
           
           <div class="text-center mb-12">
             <h2 class="text-3xl md:text-4xl font-bold mb-4">Cloudinary Transformation Quiz</h2>
-            <p class="text-lg text-gray-300 mb-8">Test your knowledge! Get all 5 questions right and win Cloudinary swag!</p>
+            <p class="text-lg text-gray-300 mb-8">Test your knowledge!</p>
           </div>
           
           <div id="quiz-container" class="space-y-8">
@@ -371,7 +357,6 @@
                       <span class="animate-pulse">Congratulations!</span>
                       <span class="ml-2">🏆</span>
                     </h3>
-                    <p class="text-gray-300 mb-4">You've earned Cloudinary Swag!</p>
                     <div class="flex justify-center space-x-4 text-2xl">
                       <span class="animate-bounce">🎁</span>
                       <span class="animate-bounce" style="animation-delay: 0.2s;">🎯</span>
@@ -380,37 +365,19 @@
                   </div>
                 </div>
               </div>
-              <button id="retake-quiz" class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+              <button id="retake-quiz" class="hidden px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
                 Take Quiz Again
               </button>
-            </div>
+             
+                <button id="newsletter-btn" class="mx-auto px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105">
+                  Last Step: Join Our Newsletter to Claim Your Prize!
+                </button>
+
+            
           </div>
         </div>
 
-        <!-- Marketo Embed Container (Hidden initially) -->
-        <div id="marketo-container" class="hidden text-center relative">
-          <div class="text-center mb-12">
-            
-            <h2 class="text-3xl md:text-4xl font-bold mb-4">🦄 Unicorn Magic Awaits!</h2>
-            <p class="text-lg text-gray-300 mb-8">Enter your details to receive your magical unicorn prize!</p>
-          </div>
-          
-          <!-- Marketo Form Placeholder -->
-          <div class="bg-gradient-to-br from-pink-900/20 to-yellow-900/20 rounded-lg p-8 border border-pink-500/30 backdrop-blur-sm">
-            <div class="text-center mb-8">
-              <div class="text-6xl mb-4">🦄✨</div>
-              <h3 class="text-2xl font-bold text-pink-300 mb-2">Enter the Unicorn Realm</h3>
-              <p class="text-gray-300">Fill out the form below to join our newsletter and receive your magical unicorn prize!</p>
-            </div>
-            
-            <!-- Marketo Form with custom styling -->
-            <div class="max-w-md mx-auto">
-              <script src="//lp.cloudinary.com/js/forms2/js/forms2.min.js"></script> 
-              <form id="mktoForm_1347" class="marketo-form"></form> 
-              <script>MktoForms2.loadForm("//lp.cloudinary.com", "796-XWL-496", 1347);</script>
-            </div>
-          </div>
-        </div>
+
       </div>
     </div>
   </main>

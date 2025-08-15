@@ -99,49 +99,46 @@ body {
   transform: translateX(-2px);
 }
 
-/* Choice interface styles */
-#choice-container {
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-#quiz-section,
-#marketo-container {
+/* Quiz section styles */
+#quiz-section {
   animation: slideIn 0.5s ease-in-out;
 }
 
-/* Tab styles */
-.tab-button {
-  transition: all 0.3s ease;
-  position: relative;
+#quiz-section:not(.hidden) {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
-.tab-button.active {
-  transform: scale(1.05);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.tab-button:hover:not(.active) {
-  transform: scale(1.02);
-}
-
-.tab-button.active::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #ffffff, #f0f0f0);
-  border-radius: 2px;
+#retake-quiz.hidden {
+  display: none !important;
 }
 
 
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Marketo form styling */
 .mktoHtmlText {
   color: white !important;
 }
+
 .mktoCaptchaDisclaimer {
-  color: white
+  color: white !important;
 }
 
 .mktoForm input[type=text], .mktoForm input[type=url], .mktoForm input[type=email], .mktoForm input[type=tel], .mktoForm input[type=number], .mktoForm input[type=date], .mktoForm textarea.mktoField, .mktoForm select.mktoField {
@@ -182,22 +179,6 @@ body {
   transform: translateY(-2px) !important;
   box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4) !important;
   background: linear-gradient(135deg, #db2777, #d97706) !important;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideIn {
-  from { 
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to { 
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .star-1 {

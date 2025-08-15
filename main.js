@@ -1,4 +1,37 @@
 document.addEventListener('DOMContentLoaded', function() {
+  // Remove the overly aggressive error handlers that prevent form submission
+  // Only log errors without preventing default behavior
+  
+  // Add specific handler for null reference errors in promises
+  window.addEventListener('error', function(event) {
+    if (event.error && event.error.message && event.error.message.includes('null')) {
+      console.warn('Null reference error caught:', event.error.message);
+      // Don't prevent default - just log it
+    }
+  });
+  
+  // Add handler for unhandled promise rejections to catch null errors
+  window.addEventListener('unhandledrejection', function(event) {
+    if (event.reason && (event.reason.message && event.reason.message.includes('null') || 
+                        event.reason.toString && event.reason.toString().includes('null'))) {
+      console.warn('Null promise rejection caught:', event.reason);
+      // Don't prevent default - just log it
+    }
+  });
+  
+  // Add specific handler for the Marketo null error that occurs after form submission
+  window.addEventListener('unhandledrejection', function(event) {
+    // Check if this is the specific null error from Marketo after form submission
+    if (event.reason === null || (event.reason && event.reason.toString && event.reason.toString().includes('null'))) {
+      console.warn('Marketo post-submission null error caught:', event.reason);
+      // Prevent this specific error from showing in console
+      event.preventDefault();
+      return false;
+    }
+  });
+  
+
+  
   const steps = d3.selectAll('.step');
   const mainImage = d3.select('#main-image');
   const sectionImages = d3.selectAll('.section-image');
@@ -203,7 +236,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Check if we're on desktop or mobile
             if (isDesktop && mainImage.node()) {
               // Desktop: update the sticky main image
-              console.log('Updating desktop main image');
               const currentSrc = mainImage.attr('src');
               const isFirstImage = !currentSrc || currentSrc === imgUrl;
               handleImageTransition(mainImage.node(), imgUrl, transform, isFirstImage);
@@ -211,7 +243,6 @@ document.addEventListener('DOMContentLoaded', function() {
               // Mobile: update the section image within this step
               const stepImage = step.select('.section-image');
               if (stepImage.node()) {
-                console.log('Updating mobile section image');
                 const currentOpacity = d3.select(stepImage.node()).style('opacity');
                 const isFirstImage = currentOpacity === '0' || currentOpacity === '';
                 handleImageTransition(stepImage.node(), imgUrl, transform, isFirstImage);
@@ -230,7 +261,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show the first image immediately on desktop
     if (isDesktop && mainImage.node()) {
-      console.log('Showing first image on desktop');
       mainImage
         .transition()
         .duration(1000)
@@ -438,9 +468,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Set up Intersection Observer after sections exist
   setupIntersectionObserver();
-  
-  // Check URL parameter for quiz visibility
-  checkQuizVisibility();
 
 });
 
@@ -507,26 +534,106 @@ document.addEventListener('DOMContentLoaded', function() {
     quizScore.textContent = `Score: ${score}/${totalQuestions} (${percentage}%)`;
     
     if (score === totalQuestions) {
-      quizMessage.textContent = "🎉 Perfect! You're a Cloudinary expert!";
+      quizMessage.textContent = "🎉 100%! You're a Cloudinary expert! Join our newsletter to stay updated!";
       quizMessage.className = "text-lg mb-6 text-green-400 font-semibold";
       swagReward.classList.remove('hidden');
-    } else if (score >= 3) {
-      quizMessage.textContent = "👍 Good job! You know your Cloudinary transformations!";
-      quizMessage.className = "text-lg mb-6 text-yellow-400 font-semibold";
+      showNewsletterButton();
+      hideRetryButton();
+    } else if (score >= 4) { // 80% or better (4 out of 5)
+      quizMessage.textContent = "👍 Great job! You know your Cloudinary transformations! Join our newsletter to stay updated!";
+      quizMessage.className = "text-lg mb-6 text-green-400 font-semibold";
+      showNewsletterButton();
+      hideRetryButton();
     } else {
       quizMessage.textContent = "📚 Keep learning! Review the transformations above and try again!";
       quizMessage.className = "text-lg mb-6 text-red-400 font-semibold";
+      // Show retry button for scores below 80%
+      showRetryButton();
+      hideNewsletterButton();
     }
     
     // Show results
     quizResults.classList.remove('hidden');
     
+    // Ensure retake quiz button is hidden initially and newsletter button is visible
+    const retakeQuizBtn = document.getElementById('retake-quiz');
+    const newsletterBtn = document.getElementById('newsletter-btn');
+    if (retakeQuizBtn) {
+      retakeQuizBtn.style.display = 'none';
+      retakeQuizBtn.classList.add('hidden');
+    }
+    if (newsletterBtn) {
+      newsletterBtn.style.display = 'block';
+    }
+    
     // Scroll to results
     quizResults.scrollIntoView({ behavior: 'smooth' });
   });
 
-  // Retake quiz
-  retakeQuizBtn.addEventListener('click', function() {
+
+
+  // Function to show retry button for scores below 80%
+  function showRetryButton() {
+    const retakeQuizBtn = document.getElementById('retake-quiz');
+    if (retakeQuizBtn) {
+      retakeQuizBtn.textContent = '🔄 Take Quiz Again';
+      retakeQuizBtn.className = 'px-8 py-4 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105';
+      retakeQuizBtn.classList.remove('hidden');
+      retakeQuizBtn.style.display = 'block';
+      console.log('Retry button is now visible');
+    }
+  }
+
+  // Function to show newsletter button for scores 4/5 or above
+  function showNewsletterButton() {
+    // Newsletter button is already visible by default, no need to show it
+    console.log('Newsletter button is already visible');
+  }
+
+  // Function to hide retry button
+  function hideRetryButton() {
+    const retakeQuizBtn = document.getElementById('retake-quiz');
+    if (retakeQuizBtn) {
+      retakeQuizBtn.style.display = 'none';
+      retakeQuizBtn.classList.add('hidden');
+      console.log('Retry button is now hidden');
+    }
+  }
+
+  // Function to hide newsletter button
+  function hideNewsletterButton() {
+    const newsletterBtn = document.getElementById('newsletter-btn');
+    if (newsletterBtn) {
+      newsletterBtn.style.display = 'none';
+      console.log('Newsletter button is now hidden');
+    }
+  }
+
+  // Function to open newsletter window
+  function openNewsletterWindow() {
+    // Get conference ID from URL parameter, default to 'e3f.lp.we-are-developers-2025' if not provided
+    const urlParams = new URLSearchParams(window.location.search);
+    const conferenceId = urlParams.get('conference') || 'e3f.lp.we-are-developers-2025';
+    
+    const newsletterUrl = `https://lp.cloudinary.com/${conferenceId}.html`;
+    const formWindow = window.open(newsletterUrl, 'marketo_form', 'width=600,height=800,scrollbars=yes,resizable=yes');
+    
+    if (formWindow) {
+      // Focus the new window
+      formWindow.focus();
+    } else {
+      // Fallback if popup is blocked
+      alert('Please allow popups for this site to open the newsletter signup form.');
+    }
+  }
+
+
+
+  // Initially hide the retake quiz button
+  retakeQuizBtn.style.display = 'none';
+
+  // Retake quiz handler function
+  function retakeQuizHandler() {
     // Reset all radio buttons
     document.querySelectorAll('input[type="radio"]').forEach(radio => {
       radio.checked = false;
@@ -545,9 +652,28 @@ document.addEventListener('DOMContentLoaded', function() {
     quizResults.classList.add('hidden');
     swagReward.classList.add('hidden');
     
+    // Hide the retake quiz button again
+    retakeQuizBtn.style.display = 'none';
+    retakeQuizBtn.classList.add('hidden');
+    
+    // Hide the newsletter button
+    const newsletterBtn = document.getElementById('newsletter-btn');
+    if (newsletterBtn) {
+      newsletterBtn.style.display = 'none';
+    }
+    
     // Scroll to top of quiz
     document.getElementById('quiz-container').scrollIntoView({ behavior: 'smooth' });
-  });
+  }
+
+  // Add event listener for retake quiz
+  retakeQuizBtn.addEventListener('click', retakeQuizHandler);
+
+  // Add event listener for newsletter button
+  const newsletterBtn = document.getElementById('newsletter-btn');
+  if (newsletterBtn) {
+    newsletterBtn.addEventListener('click', openNewsletterWindow);
+  }
 
   // Add visual feedback for selected answers (only when quiz hasn't been submitted)
   document.querySelectorAll('input[type="radio"]').forEach(radio => {
@@ -570,7 +696,12 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
+  
+  // Check URL parameter for quiz visibility after quiz elements are set up
+  checkQuizVisibility();
 }); 
+
+  
 
   // Sections data - single source of truth for all transformations
   const sectionsData = [
@@ -680,70 +811,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const showQuiz = urlParams.get('quiz');
     
-    console.log('Quiz parameter:', showQuiz);
+    console.log('Checking quiz visibility. URL param quiz =', showQuiz);
     
-    // Find the quiz section by looking for the container with quiz questions
-    const quizSection = document.querySelector('#quiz-container').closest('.bg-gradient-to-br.from-purple-900.to-black');
+    // Find the quiz section directly
+    const quizSection = document.querySelector('#quiz-section');
     if (quizSection) {
+      console.log('Quiz section found:', quizSection);
+      console.log('Current quiz section classes:', quizSection.className);
+      console.log('Current quiz section display:', quizSection.style.display);
+      
       if (showQuiz === 'true' || showQuiz === '1') {
-        // Show the choice interface first
-        const choiceContainer = document.getElementById('choice-container');
-        const quizSectionContainer = document.getElementById('quiz-section');
-        const marketoContainer = document.getElementById('marketo-container');
-        
-        console.log('Found containers:', {
-          choice: choiceContainer,
-          quiz: quizSectionContainer,
-          marketo: marketoContainer
-        });
-        
-        if (choiceContainer && quizSectionContainer && marketoContainer) {
-          choiceContainer.classList.remove('hidden');
-          quizSectionContainer.classList.add('hidden');
-          marketoContainer.classList.add('hidden');
-          
-          // Add event listeners for tab functionality
-          const quizTab = document.getElementById('quiz-tab');
-          const marketoTab = document.getElementById('marketo-tab');
-          
-          console.log('Found tab buttons:', {
-            quiz: quizTab,
-            marketo: marketoTab
-          });
-          
-          if (quizTab && marketoTab) {
-            // Show quiz section by default
-            quizSectionContainer.classList.remove('hidden');
-            marketoContainer.classList.add('hidden');
-            
-            quizTab.addEventListener('click', function() {
-              console.log('Quiz tab clicked - showing quiz');
-              // Update tab states
-              quizTab.classList.add('active');
-              marketoTab.classList.remove('active');
-              // Show quiz content
-              quizSectionContainer.classList.remove('hidden');
-              marketoContainer.classList.add('hidden');
-            });
-            
-            marketoTab.addEventListener('click', function() {
-              console.log('Marketo tab clicked - showing Marketo');
-              // Update tab states
-              marketoTab.classList.add('active');
-              quizTab.classList.remove('active');
-              // Show Marketo content
-              marketoContainer.classList.remove('hidden');
-              quizSectionContainer.classList.add('hidden');
-            });
-            
-           
-        
-          }
-        }
-        
+        // Show the quiz section
+        quizSection.classList.remove('hidden');
         quizSection.style.display = 'block';
+        quizSection.style.visibility = 'visible';
+        quizSection.style.opacity = '1';
+        console.log('Quiz section is now visible');
+        console.log('Updated quiz section classes:', quizSection.className);
+        console.log('Updated quiz section display:', quizSection.style.display);
       } else {
+        // Hide the quiz section
+        quizSection.classList.add('hidden');
         quizSection.style.display = 'none';
+        console.log('Quiz section is now hidden');
       }
+    } else {
+      console.warn('Quiz section not found in DOM');
     }
   } 
