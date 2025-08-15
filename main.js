@@ -661,22 +661,6 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
   }
 
-  // Check URL parameter for quiz visibility
-  function checkQuizVisibility() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const showQuiz = urlParams.get('quiz');
-    
-    // Find the quiz section by looking for the container with quiz questions
-    const quizSection = document.querySelector('#quiz-container').closest('.bg-gradient-to-br.from-purple-900.to-black');
-    if (quizSection) {
-      if (showQuiz === 'true' || showQuiz === '1') {
-        quizSection.style.display = 'block';
-      } else {
-        quizSection.style.display = 'none';
-      }
-    }
-  }
-
   // Function to generate all sections dynamically
   function generateAllSections() {
     const scrollyContainer = d3.select('#scrolly-container');
@@ -689,4 +673,77 @@ document.addEventListener('DOMContentLoaded', function() {
       const sectionHTML = generateSectionHTML(section);
       scrollyContainer.append('div').html(sectionHTML);
     });
+  }
+
+  // Check URL parameter for quiz visibility
+  function checkQuizVisibility() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const showQuiz = urlParams.get('quiz');
+    
+    console.log('Quiz parameter:', showQuiz);
+    
+    // Find the quiz section by looking for the container with quiz questions
+    const quizSection = document.querySelector('#quiz-container').closest('.bg-gradient-to-br.from-purple-900.to-black');
+    if (quizSection) {
+      if (showQuiz === 'true' || showQuiz === '1') {
+        // Show the choice interface first
+        const choiceContainer = document.getElementById('choice-container');
+        const quizSectionContainer = document.getElementById('quiz-section');
+        const marketoContainer = document.getElementById('marketo-container');
+        
+        console.log('Found containers:', {
+          choice: choiceContainer,
+          quiz: quizSectionContainer,
+          marketo: marketoContainer
+        });
+        
+        if (choiceContainer && quizSectionContainer && marketoContainer) {
+          choiceContainer.classList.remove('hidden');
+          quizSectionContainer.classList.add('hidden');
+          marketoContainer.classList.add('hidden');
+          
+          // Add event listeners for tab functionality
+          const quizTab = document.getElementById('quiz-tab');
+          const marketoTab = document.getElementById('marketo-tab');
+          
+          console.log('Found tab buttons:', {
+            quiz: quizTab,
+            marketo: marketoTab
+          });
+          
+          if (quizTab && marketoTab) {
+            // Show quiz section by default
+            quizSectionContainer.classList.remove('hidden');
+            marketoContainer.classList.add('hidden');
+            
+            quizTab.addEventListener('click', function() {
+              console.log('Quiz tab clicked - showing quiz');
+              // Update tab states
+              quizTab.classList.add('active');
+              marketoTab.classList.remove('active');
+              // Show quiz content
+              quizSectionContainer.classList.remove('hidden');
+              marketoContainer.classList.add('hidden');
+            });
+            
+            marketoTab.addEventListener('click', function() {
+              console.log('Marketo tab clicked - showing Marketo');
+              // Update tab states
+              marketoTab.classList.add('active');
+              quizTab.classList.remove('active');
+              // Show Marketo content
+              marketoContainer.classList.remove('hidden');
+              quizSectionContainer.classList.add('hidden');
+            });
+            
+           
+        
+          }
+        }
+        
+        quizSection.style.display = 'block';
+      } else {
+        quizSection.style.display = 'none';
+      }
+    }
   } 

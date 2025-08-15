@@ -100,7 +100,47 @@ This demo showcases various Cloudinary transformations:
 
 ## Quiz
 
-There's a simple quiz at the bottom if you want to use this form to award prizes. If the user gets 100% they can show the booth worker and get a prize. Add ?quiz=true to the URL to show the quiz.
+There's a simple quiz at the bottom if you want to use this form to award prizes. If the user gets 100% they can show the booth worker and get a prize. Add `?quiz=true` to the URL to show the quiz.
+
+### New Choice Interface
+
+When the quiz URL parameter is present (`?quiz=true`), users are now presented with a choice:
+
+1. **🧦 Take Quiz & Win Socks!** - Shows the Cloudinary transformation quiz
+2. **🦄 Get Unicorn Magic!** - Shows a Marketo embed form
+
+### New Tab Interface
+
+When the quiz URL parameter is present (`?quiz=true`), users now see a tabbed interface:
+
+1. **🧦 Quiz & Socks Tab** - Shows the Cloudinary transformation quiz
+2. **🦄 Unicorn Magic Tab** - Shows a Marketo embed form
+
+Users can easily switch between tabs to explore both options, and the quiz tab is selected by default.
+
+### Adding Marketo Embed Code
+
+To add your Marketo embed code:
+
+1. Find the Marketo container in `index.html` (around line 380)
+2. Replace the placeholder content with your Marketo embed code:
+
+```html
+<!-- Marketo Form Placeholder -->
+<div class="bg-gray-800/30 rounded-lg p-8 border border-gray-700">
+  <!-- Replace this div with your Marketo embed code -->
+  <script src="//app-sj20.marketo.com/js/forms2/js/forms2.min.js"></script>
+  <form id="mktoForm_1234"></form>
+  <script>MktoForms2.loadForm("//app-sj20.marketo.com", "123-ABC-456", 1234);</script>
+</div>
+```
+
+### Features
+
+- **Choice Interface**: Users can choose between quiz or Marketo form
+- **Back Navigation**: Back buttons allow users to return to the choice interface
+- **Smooth Transitions**: CSS animations for a polished user experience
+- **Responsive Design**: Works on both desktop and mobile devices
 
 ## License
 

@@ -198,172 +198,217 @@
     <!-- Cloudinary Quiz Section -->
     <div class="bg-gradient-to-br from-purple-900 to-black text-white py-20 relative z-10">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-          <h2 class="text-3xl md:text-4xl font-bold mb-4">Cloudinary Transformation Quiz</h2>
-          <p class="text-lg text-gray-300 mb-8">Test your knowledge! Get all 5 questions right and win Cloudinary swag!</p>
-        </div>
-        
-        <div id="quiz-container" class="space-y-8">
-          <!-- Question 1 -->
-          <div class="quiz-question bg-gray-800/30 rounded-lg p-6 border border-gray-700" data-question="1">
-            <h3 class="text-xl font-semibold mb-4">1. What transformation would you use to make an image look like a cartoon?</h3>
-            <div class="space-y-3">
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q1" value="a" class="mr-3">
-                <span>a) e_cartoonify</span>
-              </label>
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q1" value="b" class="mr-3">
-                <span>b) e_art:cartoon</span>
-              </label>
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q1" value="c" class="mr-3">
-                <span>c) e_style:cartoon</span>
-              </label>
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q1" value="d" class="mr-3">
-                <span>d) e_filter:cartoon</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Question 2 -->
-          <div class="quiz-question bg-gray-800/30 rounded-lg p-6 border border-gray-700" data-question="2">
-            <h3 class="text-xl font-semibold mb-4">2. Which parameter is used to adjust the brightness of an image?</h3>
-            <div class="space-y-3">
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q2" value="a" class="mr-3">
-                <span>a) e_light</span>
-              </label>
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q2" value="b" class="mr-3">
-                <span>b) e_brightness</span>
-              </label>
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q2" value="c" class="mr-3">
-                <span>c) e_luminance</span>
-              </label>
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q2" value="d" class="mr-3">
-                <span>d) e_exposure</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Question 3 -->
-          <div class="quiz-question bg-gray-800/30 rounded-lg p-6 border border-gray-700" data-question="3">
-            <h3 class="text-xl font-semibold mb-4">3. What does the 'e_art:aurora' transformation do?</h3>
-            <div class="space-y-3">
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q3" value="a" class="mr-3">
-                <span>a) Adds an aurora border around the image</span>
-              </label>
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q3" value="b" class="mr-3">
-                <span>b) Applies an aurora borealis effect to the image</span>
-              </label>
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q3" value="c" class="mr-3">
-                <span>c) Changes the image to aurora colors</span>
-              </label>
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q3" value="d" class="mr-3">
-                <span>d) Creates a glare effect</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Question 4 -->
-          <div class="quiz-question bg-gray-800/30 rounded-lg p-6 border border-gray-700" data-question="4">
-            <h3 class="text-xl font-semibold mb-4">4. How do you chain multiple transformations in Cloudinary?</h3>
-            <div class="space-y-3">
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q4" value="a" class="mr-3">
-                <span>a) Using commas (e_art:neon,e_brightness:50)</span>
-              </label>
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q4" value="b" class="mr-3">
-                <span>b) Using plus signs (e_art:neon+e_brightness:50)</span>
-              </label>
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q4" value="c" class="mr-3">
-                <span>c) Using forward slashes (e_art:neon/e_brightness:50)</span>
-              </label>
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q4" value="d" class="mr-3">
-                <span>d) Using ampersands (e_art:neon&e_brightness:50)</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Question 5 -->
-          <div class="quiz-question bg-gray-800/30 rounded-lg p-6 border border-gray-700" data-question="5">
-            <h3 class="text-xl font-semibold mb-4">5. What transformation removes the background from an image?</h3>
-            <div class="space-y-3">
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q5" value="a" class="mr-3">
-                <span>a) e_remove_bg</span>
-              </label>
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q5" value="b" class="mr-3">
-                <span>b) e_background_removal</span>
-              </label>
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q5" value="c" class="mr-3">
-                <span>c) e_ai_remove_bg</span>
-              </label>
-              <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
-                <input type="radio" name="q5" value="d" class="mr-3">
-                <span>d) e_transparent_bg</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Submit Button -->
-          <div class="text-center">
-            <button id="submit-quiz" class="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105">
-              🎯 Submit Quiz & Win Swag!
+        <!-- Choice Interface (Hidden initially) -->
+        <div id="choice-container" class="hidden text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold mb-4">Choose Your Prize!</h2>
+          <p class="text-lg text-gray-300 mb-8">What would you like to win today?</p>
+          
+          <!-- Tab Navigation -->
+          <div class="flex justify-center mb-8">
+            <button id="quiz-tab" class="tab-button active px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-l-lg transition-all duration-300 transform hover:scale-105 min-w-48 border-r border-blue-500">
+              🧦 Socks
+            </button>
+            <button id="marketo-tab" class="tab-button px-8 py-4 bg-gradient-to-r from-pink-600 to-yellow-600 text-white font-bold rounded-r-lg transition-all duration-300 transform hover:scale-105 min-w-48">
+              🦄 Unicorn
             </button>
           </div>
+        </div>
 
-          <!-- Results Section (Hidden initially) -->
-          <div id="quiz-results" class="hidden text-center">
-            <div id="quiz-score" class="text-2xl font-bold mb-4"></div>
-            <div id="quiz-message" class="text-lg mb-6"></div>
-            <div id="swag-reward" class="hidden">
-              <div class="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/50 rounded-lg p-6 mb-6 relative overflow-hidden">
-                <!-- Space animation background -->
-                <div class="absolute inset-0 bg-gradient-to-br from-purple-900/30 to-blue-900/30"></div>
-                
-                <!-- Floating stars animation -->
-                <div class="absolute inset-0">
-                  <div class="floating-star star-1">⭐</div>
-                  <div class="floating-star star-2">✨</div>
-                  <div class="floating-star star-3">🌟</div>
-                  <div class="floating-star star-4">💫</div>
-                  <div class="floating-star star-5">⭐</div>
-                  <div class="floating-star star-6">✨</div>
-                </div>
-                
-                <!-- Main content -->
-                <div class="relative z-10">
-                  <h3 class="text-xl font-bold text-yellow-400 mb-4 flex items-center justify-center congratulations-sparkle">
-                    <span class="mr-2">🏆</span>
-                    <span class="animate-pulse">Congratulations!</span>
-                    <span class="ml-2">🏆</span>
-                  </h3>
-                  <p class="text-gray-300 mb-4">You've earned Cloudinary Swag!</p>
-                  <div class="flex justify-center space-x-4 text-2xl">
-                    <span class="animate-bounce">🎁</span>
-                    <span class="animate-bounce" style="animation-delay: 0.2s;">🎯</span>
-                    <span class="animate-bounce" style="animation-delay: 0.4s;">⭐</span>
+        <!-- Quiz Container (Hidden initially) -->
+        <div id="quiz-section" class="hidden relative">
+          
+          <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Cloudinary Transformation Quiz</h2>
+            <p class="text-lg text-gray-300 mb-8">Test your knowledge! Get all 5 questions right and win Cloudinary swag!</p>
+          </div>
+          
+          <div id="quiz-container" class="space-y-8">
+            <!-- Question 1 -->
+            <div class="quiz-question bg-gray-800/30 rounded-lg p-6 border border-gray-700" data-question="1">
+              <h3 class="text-xl font-semibold mb-4">1. What transformation would you use to make an image look like a cartoon?</h3>
+              <div class="space-y-3">
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q1" value="a" class="mr-3">
+                  <span>a) e_cartoonify</span>
+                </label>
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q1" value="b" class="mr-3">
+                  <span>b) e_art:cartoon</span>
+                </label>
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q1" value="c" class="mr-3">
+                  <span>c) e_style:cartoon</span>
+                </label>
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q1" value="d" class="mr-3">
+                  <span>d) e_filter:cartoon</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="quiz-question bg-gray-800/30 rounded-lg p-6 border border-gray-700" data-question="2">
+              <h3 class="text-xl font-semibold mb-4">2. Which parameter is used to adjust the brightness of an image?</h3>
+              <div class="space-y-3">
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q2" value="a" class="mr-3">
+                  <span>a) e_light</span>
+                </label>
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q2" value="b" class="mr-3">
+                  <span>b) e_brightness</span>
+                </label>
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q2" value="c" class="mr-3">
+                  <span>c) e_luminance</span>
+                </label>
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q2" value="d" class="mr-3">
+                  <span>d) e_exposure</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="quiz-question bg-gray-800/30 rounded-lg p-6 border border-gray-700" data-question="3">
+              <h3 class="text-xl font-semibold mb-4">3. What does the 'e_art:aurora' transformation do?</h3>
+              <div class="space-y-3">
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q3" value="a" class="mr-3">
+                  <span>a) Adds an aurora border around the image</span>
+                </label>
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q3" value="b" class="mr-3">
+                  <span>b) Applies an aurora borealis effect to the image</span>
+                </label>
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q3" value="c" class="mr-3">
+                  <span>c) Changes the image to aurora colors</span>
+                </label>
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q3" value="d" class="mr-3">
+                  <span>d) Creates a glare effect</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="quiz-question bg-gray-800/30 rounded-lg p-6 border border-gray-700" data-question="4">
+              <h3 class="text-xl font-semibold mb-4">4. How do you chain multiple transformations in Cloudinary?</h3>
+              <div class="space-y-3">
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q4" value="a" class="mr-3">
+                  <span>a) Using commas (e_art:neon,e_brightness:50)</span>
+                </label>
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q4" value="b" class="mr-3">
+                  <span>b) Using plus signs (e_art:neon+e_brightness:50)</span>
+                </label>
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q4" value="c" class="mr-3">
+                  <span>c) Using forward slashes (e_art:neon/e_brightness:50)</span>
+                </label>
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q4" value="d" class="mr-3">
+                  <span>d) Using ampersands (e_art:neon&e_brightness:50)</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="quiz-question bg-gray-800/30 rounded-lg p-6 border border-gray-700" data-question="5">
+              <h3 class="text-xl font-semibold mb-4">5. What transformation removes the background from an image?</h3>
+              <div class="space-y-3">
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q5" value="a" class="mr-3">
+                  <span>a) e_remove_bg</span>
+                </label>
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q5" value="b" class="mr-3">
+                  <span>b) e_background_removal</span>
+                </label>
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q5" value="c" class="mr-3">
+                  <span>c) e_ai_remove_bg</span>
+                </label>
+                <label class="flex items-center p-3 bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors">
+                  <input type="radio" name="q5" value="d" class="mr-3">
+                  <span>d) e_transparent_bg</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center">
+              <button id="submit-quiz" class="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105">
+                🎯 Submit Quiz & Win Swag!
+              </button>
+            </div>
+
+            <!-- Results Section (Hidden initially) -->
+            <div id="quiz-results" class="hidden text-center">
+              <div id="quiz-score" class="text-2xl font-bold mb-4"></div>
+              <div id="quiz-message" class="text-lg mb-6"></div>
+              <div id="swag-reward" class="hidden">
+                <div class="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/50 rounded-lg p-6 mb-6 relative overflow-hidden">
+                  <!-- Space animation background -->
+                  <div class="absolute inset-0 bg-gradient-to-br from-purple-900/30 to-blue-900/30"></div>
+                  
+                  <!-- Floating stars animation -->
+                  <div class="absolute inset-0">
+                    <div class="floating-star star-1">⭐</div>
+                    <div class="floating-star star-2">✨</div>
+                    <div class="floating-star star-3">🌟</div>
+                    <div class="floating-star star-4">💫</div>
+                    <div class="floating-star star-5">⭐</div>
+                    <div class="floating-star star-6">✨</div>
+                  </div>
+                  
+                  <!-- Main content -->
+                  <div class="relative z-10">
+                    <h3 class="text-xl font-bold text-yellow-400 mb-4 flex items-center justify-center congratulations-sparkle">
+                      <span class="mr-2">🏆</span>
+                      <span class="animate-pulse">Congratulations!</span>
+                      <span class="ml-2">🏆</span>
+                    </h3>
+                    <p class="text-gray-300 mb-4">You've earned Cloudinary Swag!</p>
+                    <div class="flex justify-center space-x-4 text-2xl">
+                      <span class="animate-bounce">🎁</span>
+                      <span class="animate-bounce" style="animation-delay: 0.2s;">🎯</span>
+                      <span class="animate-bounce" style="animation-delay: 0.4s;">⭐</span>
+                    </div>
                   </div>
                 </div>
               </div>
+              <button id="retake-quiz" class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
+                Take Quiz Again
+              </button>
             </div>
-            <button id="retake-quiz" class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors">
-              Take Quiz Again
-            </button>
+          </div>
+        </div>
+
+        <!-- Marketo Embed Container (Hidden initially) -->
+        <div id="marketo-container" class="hidden text-center relative">
+          <div class="text-center mb-12">
+            
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">🦄 Unicorn Magic Awaits!</h2>
+            <p class="text-lg text-gray-300 mb-8">Enter your details to receive your magical unicorn prize!</p>
+          </div>
+          
+          <!-- Marketo Form Placeholder -->
+          <div class="bg-gradient-to-br from-pink-900/20 to-yellow-900/20 rounded-lg p-8 border border-pink-500/30 backdrop-blur-sm">
+            <div class="text-center mb-8">
+              <div class="text-6xl mb-4">🦄✨</div>
+              <h3 class="text-2xl font-bold text-pink-300 mb-2">Enter the Unicorn Realm</h3>
+              <p class="text-gray-300">Fill out the form below to join our newsletter and receive your magical unicorn prize!</p>
+            </div>
+            
+            <!-- Marketo Form with custom styling -->
+            <div class="max-w-md mx-auto">
+              <script src="//lp.cloudinary.com/js/forms2/js/forms2.min.js"></script> 
+              <form id="mktoForm_1347" class="marketo-form"></form> 
+              <script>MktoForms2.loadForm("//lp.cloudinary.com", "796-XWL-496", 1347);</script>
+            </div>
           </div>
         </div>
       </div>
@@ -374,7 +419,7 @@
   <footer class="bg-gray-900 text-white py-12 mt-32">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center">
-        <p class="text-gray-400">&copy; <script>document.write(new Date().getFullYear());</script> Cloudinary. Built with D3 and Tailwind CSS.</p>
+        <p class="text-gray-400">&copy; <script>document.write(new Date().getFullYear());</script> Cloudinary. Built with D3 and Tailwind.</p>
       </div>
     </div>
   </footer>
@@ -382,5 +427,4 @@
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="main.js"></script>
 </body>
-</html> 
 </html> 
