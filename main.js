@@ -1,337 +1,109 @@
-document.addEventListener('DOMContentLoaded', function() {
-  // Remove the overly aggressive error handlers that prevent form submission
-  // Only log errors without preventing default behavior
+// ============================================================================
+// SCROLL-D3 APP - MAIN APPLICATION FILE
+// ============================================================================
+
+// ============================================================================
+// CONFIGURATION & CONSTANTS
+// ============================================================================
+
+const CONFIG = {
+  // Cloudinary configuration
+  CLOUDINARY: {
+    BASE_URL: 'https://res.cloudinary.com/dr60nybtj/image/upload',
+    IMAGE_ID: 'v1753899977/float3_kamv1f.png'
+  },
   
-  // Add specific handler for null reference errors in promises
-  window.addEventListener('error', function(event) {
-    if (event.error && event.error.message && event.error.message.includes('null')) {
-      console.warn('Null reference error caught:', event.error.message);
-      // Don't prevent default - just log it
+  // Quiz configuration
+  QUIZ: {
+    TOTAL_QUESTIONS: 5,
+    PASSING_SCORE: 4,
+    CORRECT_ANSWERS: {
+      q1: 'a', // e_cartoonify
+      q2: 'b', // e_brightness
+      q3: 'b', // Applies an aurora borealis effect to the image
+      q4: 'c', // Using slashes
+      q5: 'b'  // e_background_removal
     }
-  });
+  },
   
-  // Add handler for unhandled promise rejections to catch null errors
-  window.addEventListener('unhandledrejection', function(event) {
-    if (event.reason && (event.reason.message && event.reason.message.includes('null') || 
-                        event.reason.toString && event.reason.toString().includes('null'))) {
-      console.warn('Null promise rejection caught:', event.reason);
-      // Don't prevent default - just log it
-    }
-  });
+  // Starfield configuration
+  STARFIELD: {
+    NUM_STARS: 80,
+    SCROLL_SPEED: 0.0003
+  }
+};
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+// URL parameter utilities
+const URLUtils = {
+  getParameter: (name) => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+  },
   
-  // Add specific handler for the Marketo null error that occurs after form submission
-  window.addEventListener('unhandledrejection', function(event) {
-    // Check if this is the specific null error from Marketo after form submission
-    if (event.reason === null || (event.reason && event.reason.toString && event.reason.toString().includes('null'))) {
-      console.warn('Marketo post-submission null error caught:', event.reason);
-      // Prevent this specific error from showing in console
-      event.preventDefault();
-      return false;
-    }
-  });
-  
-
-  
-  const steps = d3.selectAll('.step');
-  const mainImage = d3.select('#main-image');
-  const sectionImages = d3.selectAll('.section-image');
-
-  // Check if we're on desktop (large screen)
-  const isDesktop = window.innerWidth >= 1024; // lg breakpoint
-
-  // Utility function to create URL breakdown with colors
-  function createUrlBreakdown(baseUrl, transformations, imageId, options = {}) {
-    const {
-      baseUrlClass = 'text-blue-300',
-      transformationClass = 'text-black bg-yellow-300 font-semibold rounded-md px-1',
-      imageIdClass = 'text-blue-300',
-      baseUrlText = 'https://res.cloudinary.com/dr60nybtj/image/upload/',
-      imageIdText = '/v1753899977/float3_kamv1f.png',
-      transformationText = 'f_auto/q_auto'
-    } = options;
-    
-    const finalBaseUrl = baseUrl || baseUrlText;
-    const finalImageId = imageId || imageIdText;
-    const finalTransformations = transformations || transformationText;
-    
-    return `
-      <span class="${baseUrlClass}">${finalBaseUrl}</span>
-      <span class="${transformationClass}">${finalTransformations}</span>
-      <span class="${imageIdClass}">${finalImageId}</span>
-    `;
+  hasParameter: (name, value) => {
+    const param = URLUtils.getParameter(name);
+    return param === value || param === '1';
   }
+};
 
-  // Function to update URL breakdown display
-  function updateUrlBreakdownDisplay(container, baseUrl, transformations, imageId, options = {}) {
-    const html = createUrlBreakdown(baseUrl, transformations, imageId, options);
-    d3.select(container).html(html);
+// DOM utilities
+const DOMUtils = {
+  select: (selector) => document.querySelector(selector),
+  selectAll: (selector) => document.querySelectorAll(selector),
+  createElement: (tag, className = '') => {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    return element;
   }
+};
 
-  // Starfield effect
-  const canvas = d3.select('#starfield').node();
-  const ctx = canvas.getContext('2d');
-  
-  // Set canvas size
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+// ============================================================================
+// CLOUDINARY TRANSFORMATION ENGINE
+// ============================================================================
 
-  // Create stars
-  const stars = [];
-  const numStars = 80;
-  
-  for (let i = 0; i < numStars; i++) {
-    stars.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      z: Math.random() * 1000,
-      size: Math.random() * 1 + 0.5,
-      speed: Math.random() * 0.2 + 0.05
-    });
-  }
+const CloudinaryEngine = {
+  // Generate base Cloudinary URL
+  generateUrl: (transformations = '') => {
+    const { BASE_URL, IMAGE_ID } = CONFIG.CLOUDINARY;
+    return transformations.trim() 
+      ? `${BASE_URL}/${transformations}/${IMAGE_ID}`
+      : `${BASE_URL}/${IMAGE_ID}`;
+  },
 
-  // Starfield animation
-  function animateStars() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Generate responsive image URLs
+  generateResponsiveUrls: (transformations = '') => {
+    const baseTransform = transformations ? `${transformations}/` : '';
+    const { BASE_URL, IMAGE_ID } = CONFIG.CLOUDINARY;
     
-    const scrollY = window.scrollY;
-    const scrollSpeed = scrollY * 0.0003;
+    return {
+      small: `${BASE_URL}/${baseTransform}w_300,dpr_auto,f_auto,q_auto/${IMAGE_ID}`,
+      medium: `${BASE_URL}/${baseTransform}w_600,dpr_auto,f_auto,q_auto/${IMAGE_ID}`,
+      large: `${BASE_URL}/${baseTransform}w_900,dpr_auto,f_auto,q_auto/${IMAGE_ID}`,
+      xlarge: `${BASE_URL}/${baseTransform}w_1200,dpr_auto,f_auto,q_auto/${IMAGE_ID}`
+    };
+  },
+
+  // Update image with responsive srcset
+  updateImageWithSrcset: (imgElement, transformations) => {
+    const urls = CloudinaryEngine.generateResponsiveUrls(transformations);
+    const srcset = `${urls.small} 300w, ${urls.medium} 600w, ${urls.large} 900w, ${urls.xlarge} 1200w`;
     
-    stars.forEach(star => {
-      // Move stars based on scroll
-      star.z -= star.speed + scrollSpeed;
-      
-      // Reset star if it goes off screen
-      if (star.z < 1) {
-        star.z = 1000;
-        star.x = Math.random() * canvas.width;
-        star.y = Math.random() * canvas.height;
-      }
-      
-      // Calculate position
-      const x = (star.x - canvas.width / 2) * (1000 / star.z) + canvas.width / 2;
-      const y = (star.y - canvas.height / 2) * (1000 / star.z) + canvas.height / 2;
-      const size = star.size * (1000 / star.z);
-      
-      // Draw star
-      if (x > 0 && x < canvas.width && y > 0 && y < canvas.height) {
-        ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(0.6, 1000 / star.z * 0.3)})`;
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Add star trails for fast-moving stars
-        if (star.z < 100) {
-          ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 * (1000 / star.z)})`;
-          ctx.lineWidth = size * 0.3;
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(x + (x - canvas.width / 2) * 0.05, y + (y - canvas.height / 2) * 0.05);
-          ctx.stroke();
-        }
-      }
-    });
-    
-    requestAnimationFrame(animateStars);
-  }
-  
-  animateStars();
+    d3.select(imgElement)
+      .attr('srcset', srcset)
+      .attr('sizes', '(max-width: 600px) 300px, (max-width: 900px) 600px, (max-width: 1200px) 900px, 1200px')
+      .attr('src', urls.medium);
+  },
 
-
-
-  // Function to handle image transitions with responsive support
-  function handleImageTransition(imgElement, imgUrl, transform, isFirstImage = false) {
-    
-    // Find the corresponding loader
-    const imgContainer = d3.select(imgElement.parentNode);
-    const loader = imgContainer.select('.section-image-loader, #main-image-loader, #custom-image-loader');
-    
-    if (isFirstImage) {
-      // First image - fade in with responsive srcset
-      const urls = generateResponsiveUrls(transform);
-      const srcset = `${urls.small} 300w, ${urls.medium} 600w, ${urls.large} 900w, ${urls.xlarge} 1200w`;
-      
-      d3.select(imgElement)
-        .attr('srcset', srcset)
-        .attr('sizes', '(max-width: 600px) 300px, (max-width: 900px) 600px, (max-width: 1200px) 900px, 1200px')
-        .transition()
-        .duration(800)
-        .style('opacity', 1)
-        .style('transform', 'scale(1) rotate(0deg)')
-        .style('filter', 'blur(0px) brightness(1)');
-    } else {
-      // Show loader
-      loader.style('opacity', 1);
-      
-      // Subsequent images - dramatic transition with responsive srcset
-      d3.select(imgElement)
-        .transition()
-        .duration(400)
-        .style('opacity', 0)
-        .style('transform', 'scale(0.8) rotate(-5deg)')
-        .style('filter', 'blur(8px) brightness(0.5)')
-        .on('end', function() {
-          // Update image with responsive srcset
-          const urls = generateResponsiveUrls(transform);
-          const srcset = `${urls.small} 300w, ${urls.medium} 600w, ${urls.large} 900w, ${urls.xlarge} 1200w`;
-          
-          d3.select(imgElement)
-            .attr('srcset', srcset)
-            .attr('sizes', '(max-width: 600px) 300px, (max-width: 900px) 600px, (max-width: 1200px) 900px, 1200px')
-            .attr('src', urls.medium);
-          
-          // Reset styles for entrance
-          d3.select(imgElement)
-            .style('opacity', 0)
-            .style('transform', 'scale(1.2) rotate(5deg)')
-            .style('filter', 'blur(8px) brightness(1.5)');
-          
-          // Dramatic entrance transition
-          d3.select(imgElement)
-            .transition()
-            .duration(600)
-            .style('opacity', 1)
-            .style('transform', 'scale(1) rotate(0deg)')
-            .style('filter', 'blur(0px) brightness(1)')
-            .on('end', function() {
-              // Hide loader
-              loader.style('opacity', 0);
-              
-              // Add a subtle bounce effect
-              d3.select(imgElement)
-                .transition()
-                .duration(200)
-                .style('transform', 'scale(1.05)')
-                .transition()
-                .duration(200)
-                .style('transform', 'scale(1)');
-            });
-        });
-    }
-  }
-
-  // Function to set up Intersection Observer after sections are generated
-  function setupIntersectionObserver() {
-    const steps = d3.selectAll('.step');
-    const mainImage = d3.select('#main-image');
-    
-    // Single observer for all screen sizes
-    const observer = new window.IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          
-          steps.classed('active', false);
-          const step = d3.select(entry.target);
-          step.classed('active', true);
-          
-          // Get the transformation from the step
-          const transform = step.attr('data-transform');
-          if (transform) {
-            // Generate the image URL from the transformation
-            const imgUrl = generateCloudinaryUrl(transform);
-            
-            // Check if we're on desktop or mobile
-            if (isDesktop && mainImage.node()) {
-              // Desktop: update the sticky main image
-              const currentSrc = mainImage.attr('src');
-              const isFirstImage = !currentSrc || currentSrc === imgUrl;
-              handleImageTransition(mainImage.node(), imgUrl, transform, isFirstImage);
-            } else {
-              // Mobile: update the section image within this step
-              const stepImage = step.select('.section-image');
-              if (stepImage.node()) {
-                const currentOpacity = d3.select(stepImage.node()).style('opacity');
-                const isFirstImage = currentOpacity === '0' || currentOpacity === '';
-                handleImageTransition(stepImage.node(), imgUrl, transform, isFirstImage);
-              }
-            }
-          }
-        }
-      });
-    }, {
-      threshold: 0.6,
-      rootMargin: '0px 0px -15% 0px'
-    });
-
-    // Observe all steps
-    steps.nodes().forEach(step => observer.observe(step));
-    
-    // Show the first image immediately on desktop
-    if (isDesktop && mainImage.node()) {
-      mainImage
-        .transition()
-        .duration(1000)
-        .style('opacity', 1);
-    }
-  }
-
-  // Interactive Transformation Section
-  const transformationInput = d3.select('#transformation-input');
-  const applyButton = d3.select('#apply-transform');
-  const customImage = d3.select('#custom-image');
-  const exampleButtons = d3.selectAll('.example-btn');
-
-  // Base Cloudinary URL
-  const baseUrl = 'https://res.cloudinary.com/dr60nybtj/image/upload';
-  const imageId = 'v1753899977/float3_kamv1f.png';
-
-  // Function to generate Cloudinary URL
-  function generateCloudinaryUrl(transformations) {
-    let url;
-    if (!transformations || transformations.trim() === '') {
-      url = `${baseUrl}/${imageId}`;
-    } else {
-      url = `${baseUrl}/${transformations}/${imageId}`;
-    }
-    return url;
-  }
-
-  // Function to update the URL breakdown display
-  function updateUrlBreakdown(transformations) {
-    let transformationPart = transformations || '';
-    
-    updateUrlBreakdownDisplay('#generated-url-breakdown', null, transformationPart, null);
-  }
-
-  // Function to update the custom image with responsive handling
-  function updateCustomImage(transformations) {
-    const url = generateCloudinaryUrl(transformations);
-    
-    // Update the URL breakdown display
-    updateUrlBreakdown(transformations);
-    
-    // Show loader
-    const customImageLoader = d3.select('#custom-image-loader');
-    customImageLoader.style('opacity', 1);
-    
-    // Update the image with responsive srcset and smooth transition
-    customImage
-      .transition()
-      .duration(300)
-      .style('opacity', 0)
-      .on('end', function() {
-        updateImageWithSrcset(this, transformations);
-        d3.select(this)
-          .transition()
-          .duration(300)
-          .style('opacity', 1)
-          .on('end', function() {
-            // Hide loader after image loads
-            customImageLoader.style('opacity', 0);
-          });
-      });
-  }
-
-  // Function to validate transformation parameters
-  function validateTransformations(transformations) {
+  // Validate transformation parameters
+  validateTransformations: (transformations) => {
     if (!transformations || transformations.trim() === '') {
       return { isValid: true, message: '' };
     }
     
-    // Basic validation for common transformation parameters
     const validParams = [
       'e_', 'c_', 'w_', 'h_', 'g_', 'f_', 'q_', 'dpr_', 'o_', 'r_', 'b_', 'bo_', 'co_', 'a_', 'fl_'
     ];
@@ -351,360 +123,288 @@ document.addEventListener('DOMContentLoaded', function() {
     
     return { isValid: true, message: '' };
   }
+};
 
-  // Handle Apply button click with validation
-  applyButton.on('click', function() {
-    const transformations = transformationInput.property('value');
-    const validation = validateTransformations(transformations);
+// ============================================================================
+// URL BREAKDOWN DISPLAY SYSTEM
+// ============================================================================
+
+const URLBreakdown = {
+  // Create URL breakdown with colors
+  createBreakdown: (baseUrl, transformations, imageId, options = {}) => {
+    const {
+      baseUrlClass = 'text-blue-300',
+      transformationClass = 'text-black bg-yellow-300 font-semibold rounded-md px-1',
+      imageIdClass = 'text-blue-300',
+      baseUrlText = 'https://res.cloudinary.com/dr60nybtj/image/upload/',
+      imageIdText = '/v1753899977/float3_kamv1f.png',
+      transformationText = 'f_auto/q_auto'
+    } = options;
     
-    if (!validation.isValid) {
-      alert(validation.message);
-      return;
-    }
+    const finalBaseUrl = baseUrl || baseUrlText;
+    const finalImageId = imageId || imageIdText;
+    const finalTransformations = transformations || transformationText;
     
-    updateCustomImage(transformations);
-  });
+    return `
+      <span class="${baseUrlClass}">${finalBaseUrl}</span>
+      <span class="${transformationClass}">${finalTransformations}</span>
+      <span class="${imageIdClass}">${finalImageId}</span>
+    `;
+  },
 
-  // Handle Enter key in textarea with validation
-  transformationInput.on('keydown', function(event) {
-    if (event.key === 'Enter' && event.ctrlKey) {
-      const transformations = transformationInput.property('value');
-      const validation = validateTransformations(transformations);
-      
-      if (!validation.isValid) {
-        alert(validation.message);
-        return;
-      }
-      
-      updateCustomImage(transformations);
-    }
-  });
+  // Update URL breakdown display
+  updateDisplay: (container, baseUrl, transformations, imageId, options = {}) => {
+    const html = URLBreakdown.createBreakdown(baseUrl, transformations, imageId, options);
+    d3.select(container).html(html);
+  },
 
-  // Handle example button clicks
-  exampleButtons.on('click', function() {
-    const transform = d3.select(this).attr('data-transform');
-    transformationInput.property('value', transform);
-    updateCustomImage(transform);
-  });
-
-  // Function to generate responsive image URLs using Cloudinary's auto features
-  function generateResponsiveUrls(transformations) {
-    const baseTransform = transformations ? `${transformations}/` : '';
-    return {
-      small: `${baseUrl}/${baseTransform}w_300,dpr_auto,f_auto,q_auto/${imageId}`,
-      medium: `${baseUrl}/${baseTransform}w_600,dpr_auto,f_auto,q_auto/${imageId}`,
-      large: `${baseUrl}/${baseTransform}w_900,dpr_auto,f_auto,q_auto/${imageId}`,
-      xlarge: `${baseUrl}/${baseTransform}w_1200,dpr_auto,f_auto,q_auto/${imageId}`
-    };
-  }
-
-  // Function to update image with responsive srcset
-  function updateImageWithSrcset(imgElement, transformations) {
-    const urls = generateResponsiveUrls(transformations);
-    const srcset = `${urls.small} 300w, ${urls.medium} 600w, ${urls.large} 900w, ${urls.xlarge} 1200w`;
-    
-    d3.select(imgElement)
-      .attr('srcset', srcset)
-      .attr('sizes', '(max-width: 600px) 300px, (max-width: 900px) 600px, (max-width: 1200px) 900px, 1200px')
-      .attr('src', urls.medium); // Fallback for older browsers
-  }
-
-  // Initialize with a default transformation
-  const defaultTransform = '';
-  transformationInput.property('value', defaultTransform);
-  updateCustomImage(defaultTransform);
-
-  // Initialize all URL breakdowns in the HTML
-  function initializeUrlBreakdowns() {
-    // Get transformations from data attributes
+  // Initialize all URL breakdowns
+  initializeAll: () => {
     d3.selectAll('.step').each(function() {
       const step = d3.select(this);
       const transform = step.attr('data-transform');
       const urlBreakdown = step.select('.url-breakdown');
       
       if (transform && urlBreakdown.size() > 0) {
-        updateUrlBreakdownDisplay(urlBreakdown.node(), null, transform, null);
+        URLBreakdown.updateDisplay(urlBreakdown.node(), null, transform, null);
       }
     });
   }
+};
 
-  // Initialize URL breakdowns
-  initializeUrlBreakdowns();
+// ============================================================================
+// STARFIELD ANIMATION SYSTEM
+// ============================================================================
 
-  // Initialize all images with dynamic URLs
-  function initializeImages() {
-    // Initialize main image
-    const mainImage = d3.select('#main-image');
-    const mainImageUrl = generateCloudinaryUrl('f_auto/q_auto');
-    mainImage.attr('src', mainImageUrl);
-    mainImage.style('opacity', 1);
-    
-    // Initialize custom image (unoptimized)
-    const customImage = d3.select('#custom-image');
-    const customImageUrl = generateCloudinaryUrl('');
-    customImage.attr('src', customImageUrl);
-    customImage.style('opacity', 1);
-    
-    // Initialize all section images
-    d3.selectAll('.step').each(function() {
-      const step = d3.select(this);
-      const transform = step.attr('data-transform');
-      const sectionImage = step.select('.section-image');
-      
-      if (transform && sectionImage.size() > 0) {
-        const imageUrl = generateCloudinaryUrl(transform);
-        sectionImage.attr('src', imageUrl);
-        
-        // Make image visible after setting src
-        sectionImage.style('opacity', 1);
-      }
-    });
-  }
-
-  // Initialize sections first, then images
-  generateAllSections();
-  initializeImages();
-  initializeUrlBreakdowns();
+const Starfield = {
+  canvas: null,
+  ctx: null,
+  stars: [],
   
-  // Set up Intersection Observer after sections exist
-  setupIntersectionObserver();
+  init: () => {
+    Starfield.canvas = d3.select('#starfield').node();
+    Starfield.ctx = Starfield.canvas.getContext('2d');
+    Starfield.createStars();
+    Starfield.setupResize();
+    Starfield.animate();
+  },
 
-});
-
-// Quiz functionality
-document.addEventListener('DOMContentLoaded', function() {
-  const submitQuizBtn = document.getElementById('submit-quiz');
-  const quizResults = document.getElementById('quiz-results');
-  const quizScore = document.getElementById('quiz-score');
-  const quizMessage = document.getElementById('quiz-message');
-  const swagReward = document.getElementById('swag-reward');
-  const retakeQuizBtn = document.getElementById('retake-quiz');
-
-  // Correct answers
-  const correctAnswers = {
-    q1: 'a', // e_cartoonify
-    q2: 'b', // e_brightness
-    q3: 'b', // Applies an aurora borealis effect to the image
-    q4: 'c', // Using slashes
-    q5: 'b'  // e_background_removal
-  };
-
-  // Submit quiz
-  submitQuizBtn.addEventListener('click', function() {
-    let score = 0;
-    const totalQuestions = 5;
-    
-    // Reset all visual feedback first
-    document.querySelectorAll('.quiz-question').forEach(question => {
-      question.classList.remove('border-red-500', 'border-green-500');
-      question.querySelectorAll('label').forEach(label => {
-        label.classList.remove('bg-red-600/30', 'border-red-500', 'bg-green-600/30', 'border-green-500');
-        label.classList.add('bg-gray-700/50');
+  createStars: () => {
+    Starfield.stars = [];
+    for (let i = 0; i < CONFIG.STARFIELD.NUM_STARS; i++) {
+      Starfield.stars.push({
+        x: Math.random() * Starfield.canvas.width,
+        y: Math.random() * Starfield.canvas.height,
+        z: Math.random() * 1000,
+        size: Math.random() * 1 + 0.5,
+        speed: Math.random() * 0.2 + 0.05
       });
-    });
+    }
+  },
+
+  setupResize: () => {
+    const resizeCanvas = () => {
+      Starfield.canvas.width = window.innerWidth;
+      Starfield.canvas.height = window.innerHeight;
+    };
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+  },
+
+  animate: () => {
+    Starfield.ctx.clearRect(0, 0, Starfield.canvas.width, Starfield.canvas.height);
     
-    // Check each question and highlight only wrong answers
-    for (let i = 1; i <= totalQuestions; i++) {
-      const selectedAnswer = document.querySelector(`input[name="q${i}"]:checked`);
-      const questionDiv = document.querySelector(`[data-question="${i}"]`);
+    const scrollY = window.scrollY;
+    const scrollSpeed = scrollY * CONFIG.STARFIELD.SCROLL_SPEED;
+    
+    Starfield.stars.forEach(star => {
+      star.z -= star.speed + scrollSpeed;
       
-      if (selectedAnswer) {
-        const isCorrect = selectedAnswer.value === correctAnswers[`q${i}`];
-        const selectedLabel = selectedAnswer.closest('label');
-        
-        if (isCorrect) {
-          score++;
-          // Don't highlight correct answers - let users discover them through retakes
-        } else {
-          // Highlight wrong answer in red
-          selectedLabel.classList.remove('bg-gray-700/50');
-          selectedLabel.classList.add('bg-red-600/30', 'border-red-500');
-          questionDiv.classList.add('border-red-500');
-        }
-      } else {
-        // No answer selected - mark as wrong but don't show correct answer
-        questionDiv.classList.add('border-red-500');
+      if (star.z < 1) {
+        star.z = 1000;
+        star.x = Math.random() * Starfield.canvas.width;
+        star.y = Math.random() * Starfield.canvas.height;
       }
-    }
-
-    // Calculate percentage
-    const percentage = (score / totalQuestions) * 100;
-    
-    // Display results
-    quizScore.textContent = `Score: ${score}/${totalQuestions} (${percentage}%)`;
-    
-    if (score === totalQuestions) {
-      quizMessage.textContent = "🎉 100%! You're a Cloudinary expert! Join our newsletter to stay updated!";
-      quizMessage.className = "text-lg mb-6 text-green-400 font-semibold";
-      swagReward.classList.remove('hidden');
-      showNewsletterButton();
-      hideRetryButton();
-    } else if (score >= 4) { // 80% or better (4 out of 5)
-      quizMessage.textContent = "👍 Great job! You know your Cloudinary transformations! Join our newsletter to stay updated!";
-      quizMessage.className = "text-lg mb-6 text-green-400 font-semibold";
-      showNewsletterButton();
-      hideRetryButton();
-    } else {
-      quizMessage.textContent = "📚 Keep learning! Review the transformations above and try again!";
-      quizMessage.className = "text-lg mb-6 text-red-400 font-semibold";
-      // Show retry button for scores below 80%
-      showRetryButton();
-      hideNewsletterButton();
-    }
-    
-    // Show results
-    quizResults.classList.remove('hidden');
-    
-    // Ensure retake quiz button is hidden initially and newsletter button is visible
-    const retakeQuizBtn = document.getElementById('retake-quiz');
-    const newsletterBtn = document.getElementById('newsletter-btn');
-    if (retakeQuizBtn) {
-      retakeQuizBtn.style.display = 'none';
-      retakeQuizBtn.classList.add('hidden');
-    }
-    if (newsletterBtn) {
-      newsletterBtn.style.display = 'block';
-    }
-    
-    // Scroll to results
-    quizResults.scrollIntoView({ behavior: 'smooth' });
-  });
-
-
-
-  // Function to show retry button for scores below 80%
-  function showRetryButton() {
-    const retakeQuizBtn = document.getElementById('retake-quiz');
-    if (retakeQuizBtn) {
-      retakeQuizBtn.textContent = '🔄 Take Quiz Again';
-      retakeQuizBtn.className = 'px-8 py-4 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105';
-      retakeQuizBtn.classList.remove('hidden');
-      retakeQuizBtn.style.display = 'block';
-      console.log('Retry button is now visible');
-    }
-  }
-
-  // Function to show newsletter button for scores 4/5 or above
-  function showNewsletterButton() {
-    // Newsletter button is already visible by default, no need to show it
-    console.log('Newsletter button is already visible');
-  }
-
-  // Function to hide retry button
-  function hideRetryButton() {
-    const retakeQuizBtn = document.getElementById('retake-quiz');
-    if (retakeQuizBtn) {
-      retakeQuizBtn.style.display = 'none';
-      retakeQuizBtn.classList.add('hidden');
-      console.log('Retry button is now hidden');
-    }
-  }
-
-  // Function to hide newsletter button
-  function hideNewsletterButton() {
-    const newsletterBtn = document.getElementById('newsletter-btn');
-    if (newsletterBtn) {
-      newsletterBtn.style.display = 'none';
-      console.log('Newsletter button is now hidden');
-    }
-  }
-
-  // Function to open newsletter window
-  function openNewsletterWindow() {
-    // Get conference ID from URL parameter, default to 'e3f.lp.we-are-developers-2025' if not provided
-    const urlParams = new URLSearchParams(window.location.search);
-    const conferenceId = urlParams.get('conference') || 'e3f.lp.we-are-developers-2025';
-    
-    const newsletterUrl = `https://lp.cloudinary.com/${conferenceId}.html`;
-    const formWindow = window.open(newsletterUrl, 'marketo_form', 'width=600,height=800,scrollbars=yes,resizable=yes');
-    
-    if (formWindow) {
-      // Focus the new window
-      formWindow.focus();
-    } else {
-      // Fallback if popup is blocked
-      alert('Please allow popups for this site to open the newsletter signup form.');
-    }
-  }
-
-
-
-  // Initially hide the retake quiz button
-  retakeQuizBtn.style.display = 'none';
-
-  // Retake quiz handler function
-  function retakeQuizHandler() {
-    // Reset all radio buttons
-    document.querySelectorAll('input[type="radio"]').forEach(radio => {
-      radio.checked = false;
+      
+      const x = (star.x - Starfield.canvas.width / 2) * (1000 / star.z) + Starfield.canvas.width / 2;
+      const y = (star.y - Starfield.canvas.height / 2) * (1000 / star.z) + Starfield.canvas.height / 2;
+      const size = star.size * (1000 / star.z);
+      
+      if (x > 0 && x < Starfield.canvas.width && y > 0 && y < Starfield.canvas.height) {
+        Starfield.ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(0.6, 1000 / star.z * 0.3)})`;
+        Starfield.ctx.beginPath();
+        Starfield.ctx.arc(x, y, size, 0, Math.PI * 2);
+        Starfield.ctx.fill();
+        
+        if (star.z < 100) {
+          Starfield.ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 * (1000 / star.z)})`;
+          Starfield.ctx.lineWidth = size * 0.3;
+          Starfield.ctx.beginPath();
+          Starfield.ctx.moveTo(x, y);
+          Starfield.ctx.lineTo(x + (x - Starfield.canvas.width / 2) * 0.05, y + (y - Starfield.canvas.height / 2) * 0.05);
+          Starfield.ctx.stroke();
+        }
+      }
     });
     
-    // Reset all visual feedback
-    document.querySelectorAll('.quiz-question').forEach(question => {
-      question.classList.remove('border-red-500', 'border-green-500');
-      question.querySelectorAll('label').forEach(label => {
-        label.classList.remove('bg-red-600/30', 'border-red-500', 'bg-green-600/30', 'border-green-500');
-        label.classList.add('bg-gray-700/50');
-      });
-    });
-    
-    // Hide results
-    quizResults.classList.add('hidden');
-    swagReward.classList.add('hidden');
-    
-    // Hide the retake quiz button again
-    retakeQuizBtn.style.display = 'none';
-    retakeQuizBtn.classList.add('hidden');
-    
-    // Hide the newsletter button
-    const newsletterBtn = document.getElementById('newsletter-btn');
-    if (newsletterBtn) {
-      newsletterBtn.style.display = 'none';
-    }
-    
-    // Scroll to top of quiz
-    document.getElementById('quiz-container').scrollIntoView({ behavior: 'smooth' });
+    requestAnimationFrame(Starfield.animate);
   }
+};
 
-  // Add event listener for retake quiz
-  retakeQuizBtn.addEventListener('click', retakeQuizHandler);
+// ============================================================================
+// IMAGE TRANSITION SYSTEM
+// ============================================================================
 
-  // Add event listener for newsletter button
-  const newsletterBtn = document.getElementById('newsletter-btn');
-  if (newsletterBtn) {
-    newsletterBtn.addEventListener('click', openNewsletterWindow);
-  }
-
-  // Add visual feedback for selected answers (only when quiz hasn't been submitted)
-  document.querySelectorAll('input[type="radio"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-      // Only show selection feedback if quiz hasn't been submitted
-      if (quizResults.classList.contains('hidden')) {
-        // Remove previous selections from this question
-        const questionDiv = this.closest('.quiz-question');
-        questionDiv.querySelectorAll('label').forEach(label => {
-          label.classList.remove('bg-green-600/30', 'border-green-500');
-          label.classList.add('bg-gray-700/50');
+const ImageTransitions = {
+  // Handle image transitions with responsive support
+  handleTransition: (imgElement, imgUrl, transform, isFirstImage = false) => {
+    const imgContainer = d3.select(imgElement.parentNode);
+    const loader = imgContainer.select('.section-image-loader, #main-image-loader, #custom-image-loader');
+    
+    if (isFirstImage) {
+      const urls = CloudinaryEngine.generateResponsiveUrls(transform);
+      const srcset = `${urls.small} 300w, ${urls.medium} 600w, ${urls.large} 900w, ${urls.xlarge} 1200w`;
+      
+      d3.select(imgElement)
+        .attr('srcset', srcset)
+        .attr('sizes', '(max-width: 600px) 300px, (max-width: 900px) 600px, (max-width: 1200px) 900px, 1200px')
+        .transition()
+        .duration(800)
+        .style('opacity', 1)
+        .style('transform', 'scale(1) rotate(0deg)')
+        .style('filter', 'blur(0px) brightness(1)');
+    } else {
+      loader.style('opacity', 1);
+      
+      d3.select(imgElement)
+        .transition()
+        .duration(400)
+        .style('opacity', 0)
+        .style('transform', 'scale(0.8) rotate(-5deg)')
+        .style('filter', 'blur(8px) brightness(0.5)')
+        .on('end', function() {
+          const urls = CloudinaryEngine.generateResponsiveUrls(transform);
+          const srcset = `${urls.small} 300w, ${urls.medium} 600w, ${urls.large} 900w, ${urls.xlarge} 1200w`;
+          
+          d3.select(imgElement)
+            .attr('srcset', srcset)
+            .attr('sizes', '(max-width: 600px) 300px, (max-width: 900px) 600px, (max-width: 1200px) 900px, 1200px')
+            .attr('src', urls.medium);
+          
+          d3.select(imgElement)
+            .style('opacity', 0)
+            .style('transform', 'scale(1.2) rotate(5deg)')
+            .style('filter', 'blur(8px) brightness(1.5)');
+          
+          d3.select(imgElement)
+            .transition()
+            .duration(600)
+            .style('opacity', 1)
+            .style('transform', 'scale(1) rotate(0deg)')
+            .style('filter', 'blur(0px) brightness(1)')
+            .on('end', function() {
+              loader.style('opacity', 0);
+              
+              d3.select(imgElement)
+                .transition()
+                .duration(200)
+                .style('transform', 'scale(1.05)')
+                .transition()
+                .duration(200)
+                .style('transform', 'scale(1)');
+            });
         });
-        
-        // Highlight selected answer
-        if (this.checked) {
-          const selectedLabel = this.closest('label');
-          selectedLabel.classList.remove('bg-gray-700/50');
-          selectedLabel.classList.add('bg-green-600/30', 'border-green-500');
+    }
+  },
+
+  // Update custom image with responsive handling
+  updateCustomImage: (transformations) => {
+    const customImage = d3.select('#custom-image');
+    const customImageLoader = d3.select('#custom-image-loader');
+    
+    const url = CloudinaryEngine.generateUrl(transformations);
+    URLBreakdown.updateDisplay('#generated-url-breakdown', null, transformations, null);
+    
+    customImageLoader.style('opacity', 1);
+    
+    customImage
+      .transition()
+      .duration(300)
+      .style('opacity', 0)
+      .on('end', function() {
+        CloudinaryEngine.updateImageWithSrcset(this, transformations);
+        d3.select(this)
+          .transition()
+          .duration(300)
+          .style('opacity', 1)
+          .on('end', function() {
+            customImageLoader.style('opacity', 0);
+          });
+      });
+  }
+};
+
+// ============================================================================
+// INTERSECTION OBSERVER SYSTEM
+// ============================================================================
+
+const IntersectionObserver = {
+  observer: null,
+  isDesktop: window.innerWidth >= 1024,
+  
+  init: () => {
+    const steps = d3.selectAll('.step');
+    const mainImage = d3.select('#main-image');
+    
+    IntersectionObserver.observer = new window.IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          steps.classed('active', false);
+          const step = d3.select(entry.target);
+          step.classed('active', true);
+          
+          const transform = step.attr('data-transform');
+          if (transform) {
+            const imgUrl = CloudinaryEngine.generateUrl(transform);
+            
+            if (IntersectionObserver.isDesktop && mainImage.node()) {
+              const currentSrc = mainImage.attr('src');
+              const isFirstImage = !currentSrc || currentSrc === imgUrl;
+              ImageTransitions.handleTransition(mainImage.node(), imgUrl, transform, isFirstImage);
+            } else {
+              const stepImage = step.select('.section-image');
+              if (stepImage.node()) {
+                const currentOpacity = d3.select(stepImage.node()).style('opacity');
+                const isFirstImage = currentOpacity === '0' || currentOpacity === '';
+                ImageTransitions.handleTransition(stepImage.node(), imgUrl, transform, isFirstImage);
+              }
+            }
+          }
         }
-      }
+      });
+    }, {
+      threshold: 0.6,
+      rootMargin: '0px 0px -15% 0px'
     });
-  });
-  
-  // Check URL parameter for quiz visibility after quiz elements are set up
-  checkQuizVisibility();
-}); 
 
-  
+    steps.nodes().forEach(step => IntersectionObserver.observer.observe(step));
+    
+    if (IntersectionObserver.isDesktop && mainImage.node()) {
+      mainImage
+        .transition()
+        .duration(1000)
+        .style('opacity', 1);
+    }
+  }
+};
 
+// ============================================================================
+// SECTIONS GENERATION SYSTEM
+// ============================================================================
+
+const SectionsGenerator = {
   // Sections data - single source of truth for all transformations
-  const sectionsData = [
+  sectionsData: [
     {
       index: 0,
       transform: 'f_auto/q_auto',
@@ -754,22 +454,19 @@ document.addEventListener('DOMContentLoaded', function() {
       description: 'I feel like going incognito. Let\'s add some pixels.',
       alt: 'Pixelate'
     }
-  ];
+  ],
 
-  // Function to generate section HTML
-  function generateSectionHTML(section) {
+  // Generate section HTML
+  generateSectionHTML: (section) => {
     return `
       <section class="step bg-transparent rounded-xl p-6 lg:p-8 min-h-64 lg:min-h-64 flex flex-col lg:flex-row items-center justify-center transition-all duration-300" 
                data-index="${section.index}" data-transform="${section.transform}">
-        <!-- Responsive Layout: Single image with responsive positioning -->
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between w-full lg:max-w-6xl">
-          <!-- Image Column -->
           <div class="w-full max-w-sm lg:max-w-md mx-auto mb-6 lg:mb-0 lg:flex-1 lg:pr-8">
             <div class="text-center">
               <div class="relative">
                 <img class="section-image w-full rounded-xl object-cover opacity-0" 
                      alt="${section.alt}">
-                <!-- Loader overlay -->
                 <div class="section-image-loader absolute inset-0 bg-gray-900/80 rounded-xl flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none">
                   <div class="text-center">
                     <div class="animate-spin rounded-full h-8 w-8 lg:h-12 lg:w-12 border-b-2 border-purple-500 mx-auto mb-2 lg:mb-4"></div>
@@ -779,7 +476,6 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
           </div>
           
-          <!-- Content Column -->
           <div class="lg:pl-8">
             <div class="text text-lg text-gray-300 text-center lg:text-left max-w-2xl">
               <h2 class="text-2xl font-bold text-white mb-4">${section.title}</h2>
@@ -790,52 +486,350 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       </section>
     `;
-  }
+  },
 
-  // Function to generate all sections dynamically
-  function generateAllSections() {
+  // Generate all sections
+  generateAll: () => {
     const scrollyContainer = d3.select('#scrolly-container');
-    
-    // Clear existing sections (except any static ones)
     scrollyContainer.selectAll('.step').remove();
     
-    // Generate and append all sections
-    sectionsData.forEach(section => {
-      const sectionHTML = generateSectionHTML(section);
+    SectionsGenerator.sectionsData.forEach(section => {
+      const sectionHTML = SectionsGenerator.generateSectionHTML(section);
       scrollyContainer.append('div').html(sectionHTML);
     });
-  }
+  },
 
-  // Check URL parameter for quiz visibility
-  function checkQuizVisibility() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const showQuiz = urlParams.get('quiz');
+  // Initialize all images
+  initializeImages: () => {
+    const mainImage = d3.select('#main-image');
+    const mainImageUrl = CloudinaryEngine.generateUrl('f_auto/q_auto');
+    mainImage.attr('src', mainImageUrl);
+    mainImage.style('opacity', 1);
     
-    console.log('Checking quiz visibility. URL param quiz =', showQuiz);
+    const customImage = d3.select('#custom-image');
+    const customImageUrl = CloudinaryEngine.generateUrl('');
+    customImage.attr('src', customImageUrl);
+    customImage.style('opacity', 1);
     
-    // Find the quiz section directly
-    const quizSection = document.querySelector('#quiz-section');
-    if (quizSection) {
-      console.log('Quiz section found:', quizSection);
-      console.log('Current quiz section classes:', quizSection.className);
-      console.log('Current quiz section display:', quizSection.style.display);
+    d3.selectAll('.step').each(function() {
+      const step = d3.select(this);
+      const transform = step.attr('data-transform');
+      const sectionImage = step.select('.section-image');
       
-      if (showQuiz === 'true' || showQuiz === '1') {
-        // Show the quiz section
+      if (transform && sectionImage.size() > 0) {
+        const imageUrl = CloudinaryEngine.generateUrl(transform);
+        sectionImage.attr('src', imageUrl);
+        sectionImage.style('opacity', 1);
+      }
+    });
+  }
+};
+
+// ============================================================================
+// INTERACTIVE TRANSFORMATION SYSTEM
+// ============================================================================
+
+const InteractiveTransformations = {
+  init: () => {
+    const transformationInput = d3.select('#transformation-input');
+    const applyButton = d3.select('#apply-transform');
+    const exampleButtons = d3.selectAll('.example-btn');
+
+    // Handle Apply button click with validation
+    applyButton.on('click', function() {
+      const transformations = transformationInput.property('value');
+      const validation = CloudinaryEngine.validateTransformations(transformations);
+      
+      if (!validation.isValid) {
+        alert(validation.message);
+        return;
+      }
+      
+      ImageTransitions.updateCustomImage(transformations);
+    });
+
+    // Handle Enter key in textarea with validation
+    transformationInput.on('keydown', function(event) {
+      if (event.key === 'Enter' && event.ctrlKey) {
+        const transformations = transformationInput.property('value');
+        const validation = CloudinaryEngine.validateTransformations(transformations);
+        
+        if (!validation.isValid) {
+          alert(validation.message);
+          return;
+        }
+        
+        ImageTransitions.updateCustomImage(transformations);
+      }
+    });
+
+    // Handle example button clicks
+    exampleButtons.on('click', function() {
+      const transform = d3.select(this).attr('data-transform');
+      transformationInput.property('value', transform);
+      ImageTransitions.updateCustomImage(transform);
+    });
+
+    // Initialize with default transformation
+    const defaultTransform = '';
+    transformationInput.property('value', defaultTransform);
+    ImageTransitions.updateCustomImage(defaultTransform);
+  }
+};
+
+// ============================================================================
+// QUIZ SYSTEM
+// ============================================================================
+
+const QuizSystem = {
+  elements: {},
+  
+  init: () => {
+    QuizSystem.elements = {
+      submitBtn: DOMUtils.select('#submit-quiz'),
+      results: DOMUtils.select('#quiz-results'),
+      score: DOMUtils.select('#quiz-score'),
+      message: DOMUtils.select('#quiz-message'),
+      swagReward: DOMUtils.select('#swag-reward'),
+      retakeBtn: DOMUtils.select('#retake-quiz'),
+      newsletterBtn: DOMUtils.select('#newsletter-btn')
+    };
+    
+    QuizSystem.setupEventListeners();
+    QuizSystem.checkVisibility();
+  },
+
+  setupEventListeners: () => {
+    QuizSystem.elements.submitBtn.addEventListener('click', QuizSystem.handleSubmit);
+    QuizSystem.elements.retakeBtn.addEventListener('click', QuizSystem.handleRetake);
+    QuizSystem.elements.newsletterBtn.addEventListener('click', QuizSystem.openNewsletterWindow);
+    
+    // Add visual feedback for selected answers
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+      radio.addEventListener('change', QuizSystem.handleAnswerSelection);
+    });
+  },
+
+  handleSubmit: () => {
+    let score = 0;
+    const { TOTAL_QUESTIONS, CORRECT_ANSWERS } = CONFIG.QUIZ;
+    
+    // Reset visual feedback
+    QuizSystem.resetVisualFeedback();
+    
+    // Check answers
+    for (let i = 1; i <= TOTAL_QUESTIONS; i++) {
+      const selectedAnswer = document.querySelector(`input[name="q${i}"]:checked`);
+      const questionDiv = document.querySelector(`[data-question="${i}"]`);
+      
+      if (selectedAnswer) {
+        const isCorrect = selectedAnswer.value === CORRECT_ANSWERS[`q${i}`];
+        const selectedLabel = selectedAnswer.closest('label');
+        
+        if (isCorrect) {
+          score++;
+        } else {
+          selectedLabel.classList.remove('bg-gray-700/50');
+          selectedLabel.classList.add('bg-red-600/30', 'border-red-500');
+          questionDiv.classList.add('border-red-500');
+        }
+      } else {
+        questionDiv.classList.add('border-red-500');
+      }
+    }
+
+    // Display results
+    const percentage = (score / TOTAL_QUESTIONS) * 100;
+    QuizSystem.elements.score.textContent = `Score: ${score}/${TOTAL_QUESTIONS} (${percentage}%)`;
+    
+    QuizSystem.showResults(score);
+    QuizSystem.displayResults();
+    QuizSystem.scrollToResults();
+  },
+
+  resetVisualFeedback: () => {
+    document.querySelectorAll('.quiz-question').forEach(question => {
+      question.classList.remove('border-red-500', 'border-green-500');
+      question.querySelectorAll('label').forEach(label => {
+        label.classList.remove('bg-red-600/30', 'border-red-500', 'bg-green-600/30', 'border-green-500');
+        label.classList.add('bg-gray-700/50');
+      });
+    });
+  },
+
+  showResults: (score) => {
+    const { PASSING_SCORE } = CONFIG.QUIZ;
+    
+    if (score === CONFIG.QUIZ.TOTAL_QUESTIONS) {
+      QuizSystem.elements.message.textContent = "🎉 100%! You're a Cloudinary expert! Join our newsletter to stay updated!";
+      QuizSystem.elements.message.className = "text-lg mb-6 text-green-400 font-semibold";
+      QuizSystem.elements.swagReward.classList.remove('hidden');
+      QuizSystem.hideRetryButton();
+      QuizSystem.showNewsletterButton();
+    } else if (score >= PASSING_SCORE) {
+      QuizSystem.elements.message.textContent = "👍 Great job! You know your Cloudinary transformations! Join our newsletter to stay updated!";
+      QuizSystem.elements.message.className = "text-lg mb-6 text-green-400 font-semibold";
+      QuizSystem.hideRetryButton();
+      QuizSystem.showNewsletterButton();
+    } else {
+      QuizSystem.elements.message.textContent = "📚 Keep learning! Review the transformations above and try again!";
+      QuizSystem.elements.message.className = "text-lg mb-6 text-red-400 font-semibold";
+      QuizSystem.showRetryButton();
+      QuizSystem.hideNewsletterButton();
+    }
+  },
+
+  displayResults: () => {
+    QuizSystem.elements.results.classList.remove('hidden');
+  },
+
+  scrollToResults: () => {
+    QuizSystem.elements.results.scrollIntoView({ behavior: 'smooth' });
+  },
+
+  showRetryButton: () => {
+    if (QuizSystem.elements.retakeBtn) {
+      QuizSystem.elements.retakeBtn.textContent = '🔄 Take Quiz Again';
+      QuizSystem.elements.retakeBtn.className = 'mx-auto px-8 py-4 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105';
+      QuizSystem.elements.retakeBtn.classList.remove('hidden');
+      QuizSystem.elements.retakeBtn.style.display = 'block';
+    }
+  },
+
+  hideRetryButton: () => {
+    if (QuizSystem.elements.retakeBtn) {
+      QuizSystem.elements.retakeBtn.style.display = 'none';
+      QuizSystem.elements.retakeBtn.classList.add('hidden');
+    }
+  },
+
+  hideNewsletterButton: () => {
+    if (QuizSystem.elements.newsletterBtn) {
+      QuizSystem.elements.newsletterBtn.style.display = 'none';
+    }
+  },
+
+  showNewsletterButton: () => {
+    if (QuizSystem.elements.newsletterBtn) {
+      QuizSystem.elements.newsletterBtn.style.display = 'block';
+    }
+  },
+
+  handleRetake: () => {
+    // Reset radio buttons
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+      radio.checked = false;
+    });
+    
+    // Reset visual feedback
+    QuizSystem.resetVisualFeedback();
+    
+    // Hide results
+    QuizSystem.elements.results.classList.add('hidden');
+    QuizSystem.elements.swagReward.classList.add('hidden');
+    
+    // Hide buttons
+    QuizSystem.hideRetryButton();
+    QuizSystem.hideNewsletterButton();
+    
+    // Scroll to top of quiz
+    document.getElementById('quiz-container').scrollIntoView({ behavior: 'smooth' });
+  },
+
+  handleAnswerSelection: function() {
+    if (QuizSystem.elements.results.classList.contains('hidden')) {
+      const questionDiv = this.closest('.quiz-question');
+      questionDiv.querySelectorAll('label').forEach(label => {
+        label.classList.remove('bg-green-600/30', 'border-green-500');
+        label.classList.add('bg-gray-700/50');
+      });
+      
+      if (this.checked) {
+        const selectedLabel = this.closest('label');
+        selectedLabel.classList.remove('bg-gray-700/50');
+        selectedLabel.classList.add('bg-green-600/30', 'border-green-500');
+      }
+    }
+  },
+
+  openNewsletterWindow: () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const conferenceId = urlParams.get('conference') || 'e3f.lp.we-are-developers-2025';
+    
+    const newsletterUrl = `https://lp.cloudinary.com/${conferenceId}.html`;
+    const formWindow = window.open(newsletterUrl, 'marketo_form', 'width=600,height=800,scrollbars=yes,resizable=yes');
+    
+    if (formWindow) {
+      formWindow.focus();
+    } else {
+      alert('Please allow popups for this site to open the newsletter signup form.');
+    }
+  },
+
+  checkVisibility: () => {
+    const showQuiz = URLUtils.hasParameter('quiz', 'true');
+    const quizSection = DOMUtils.select('#quiz-section');
+    
+    if (quizSection) {
+      if (showQuiz) {
         quizSection.classList.remove('hidden');
         quizSection.style.display = 'block';
         quizSection.style.visibility = 'visible';
         quizSection.style.opacity = '1';
-        console.log('Quiz section is now visible');
-        console.log('Updated quiz section classes:', quizSection.className);
-        console.log('Updated quiz section display:', quizSection.style.display);
       } else {
-        // Hide the quiz section
         quizSection.classList.add('hidden');
         quizSection.style.display = 'none';
-        console.log('Quiz section is now hidden');
       }
-    } else {
-      console.warn('Quiz section not found in DOM');
     }
-  } 
+  }
+};
+
+// ============================================================================
+// ERROR HANDLING
+// ============================================================================
+
+const ErrorHandler = {
+  init: () => {
+    // Add specific handler for null reference errors in promises
+    window.addEventListener('error', function(event) {
+      if (event.error && event.error.message && event.error.message.includes('null')) {
+        console.warn('Null reference error caught:', event.error.message);
+      }
+    });
+  }
+};
+
+// ============================================================================
+// MAIN APPLICATION INITIALIZATION
+// ============================================================================
+
+const App = {
+  init: () => {
+    // Initialize error handling
+    ErrorHandler.init();
+    
+    // Initialize starfield
+    Starfield.init();
+    
+    // Generate sections and initialize images
+    SectionsGenerator.generateAll();
+    SectionsGenerator.initializeImages();
+    URLBreakdown.initializeAll();
+    
+    // Set up intersection observer
+    IntersectionObserver.init();
+    
+    // Initialize interactive transformations
+    InteractiveTransformations.init();
+    
+    // Initialize quiz system
+    QuizSystem.init();
+  }
+};
+
+// ============================================================================
+// DOM READY EVENT LISTENERS
+// ============================================================================
+
+// Main app initialization
+document.addEventListener('DOMContentLoaded', App.init); 
